@@ -1,0 +1,206 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8">
+<title>لوحة تحكم PRO DENT</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<style>
+body{font-family:Tahoma;background:#f0f4f8;margin:0;padding:20px;text-align:center}
+.box{background:#fff;padding:25px;border-radius:10px;box-shadow:0 4px 15px rgba(0,0,0,0.1);max-width:450px;margin:20px auto}
+input,textarea,select{width:100%;padding:10px;margin:10px 0;box-sizing:border-box;border:1px solid #ccc;border-radius:5px}
+button{width:100%;padding:12px;background:#112d4e;color:#fff;border:none;font-weight:bold;cursor:pointer;border-radius:5px}
+button:hover{background:#3f72af}
+.hidden{display:none}
+h2{color:#112d4e;margin-top:0}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+th,td{border:1px solid #ddd;padding:8px;text-align:center}
+th{background:#3f72af;color:#fff}
+.btn-done{background:#25D366;padding:4px 8px;color:#fff;border:none;border-radius:3px;cursor:pointer;font-weight:bold}
+.btn-del{background:#d9534f;padding:4px 8px;color:#fff;border:none;border-radius:3px;cursor:pointer;font-weight:bold;margin-top:2px}
+.logout{background:#d9534f;margin-top:20px}
+
+/* تصميم الروشتة الطبي السري */
+#prescription-print{display:none;background:#fff;padding:40px;border:5px double #112d4e;text-align:right;max-width:600px;margin:20px auto;box-sizing:border-box}
+
+/* كود سحري: عند الضغط على طباعة، يتم إخفاء كل شيء وإظهار الروشتة فقط */
+@media print {
+  body { background: #fff; padding: 0; }
+  .box, #login-box, #admin-box, button, hr { display: none !important; }
+  #prescription-print { display: block !important; border: none; padding: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div id="login-box" class="box">
+<h2>قفل الأمان 🔒</h2>
+<input type="password" id="pass" placeholder="الرقم السري">
+<button onclick="login()">دخول</button>
+</div>
+
+<div id="admin-box" class="box">
+<h2>لوحة تحكم العيادة 🛠</h2>
+<p style="color:#25D366;font-weight:bold">مرحباً د. إبراهيم</p>
+<hr style="border:0;border-top:1px solid #eee;margin:15px 0">
+
+<div style="text-align:right">
+<h4 style="margin:0;color:#2bc5b2">📄 إصدار روشتة طبية ذكية:</h4>
+<input type="text" id="rx-name" placeholder="اسم المريض">
+<div style="display:flex;gap:10px">
+  <input type="text" id="rx-age" placeholder="العمر" style="flex:1">
+  <input type="date" id="rx-date" style="flex:2">
+</div>
+<textarea id="rx-meds" rows="5" placeholder="اكتب الأدوية هنا بالجرعات..&#10;مثال:&#10;1- Amoxicillin 500mg (Cap) &#10;   T.d.s (كل 8 ساعات بعد الأكل) لمده 5 ايام"></textarea>
+<button onclick="printRx()" style="background:#2bc5b2">طباعة الروشتة / حفظ PDF 🖨</button>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:20px 0">
+
+<div style="text-align:right">
+<h4 style="margin:0;color:#112d4e">📅 جدول الحجوزات الحالية:</h4>
+<table>
+<thead><tr><th>المريض</th><th>الموبايل</th><th>الخدمة</th><th>الحالة</th><th>تحكم</th></tr></thead>
+<tbody id="bookings-list"></tbody>
+</table>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:20px 0">
+
+<div style="text-align:right">
+<h4 style="margin:0;color:#3f72af">📝 إضافة مقال طبي جديد:</h4>
+<input type="text" id="post-title" placeholder="عنوان المقال">
+<textarea id="post-body" rows="3" placeholder="نص المقال الطبي..."></textarea>
+<button onclick="addPost()" style="background:#3f72af">نشر المقال</button>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:20px 0">
+
+<div style="text-align:right">
+<h4 style="margin:0;color:#3f72af">🦷 إضافة حالة قبل وبعد:</h4>
+<input type="text" id="case-title" placeholder="اسم الحالة">
+<input type="text" id="img-before" placeholder="اسم صورة قبل (before1.jpg)">
+<input type="text" id="img-after" placeholder="اسم صورة بعد (after1.jpg)">
+<button onclick="addCase()" style="background:#3f72af">نشر الحالة</button>
+</div>
+
+<button onclick="logout()" class="logout">تسجيل خروج</button>
+</div><div id="prescription-print">
+  <div style="display:flex;justify-content:between;border-bottom:3px solid #112d4e;padding-bottom:10px;margin-bottom:20px">
+    <div style="flex:1;text-align:right">
+      <h2 style="margin:0;color:#112d4e">PRO DENT</h2>
+      <p style="margin:5px 0 0;font-weight:bold;color:#555">د. إبراهيم عبد المحسن</p>
+      <p style="margin:2px 0;font-size:12px;color:#777">طبيب جراحة وفم وتجميل الأسنان</p>
+    </div>
+    <div style="flex:1;text-align:left;font-size:12px;color:#777;direction:ltr">
+      <p style="margin:0">Tel: +20 1020526886</p>
+      <p style="margin:2px 0">Beni Suef, Egypt</p>
+    </div>
+  </div>
+
+  <div style="background:#f9f9f9;padding:10px;border-radius:5px;margin-bottom:20px;font-size:14px">
+    <span style="font-weight:bold">اسم المريض:</span> <span id="print-name"></span> &nbsp;|&nbsp;
+    <span style="font-weight:bold">العمر:</span> <span id="print-age"></span> &nbsp;|&nbsp;
+    <span style="font-weight:bold">التاريخ:</span> <span id="print-date"></span>
+  </div>
+
+  <h3 style="color:#112d4e;margin:0 0 15px 0;font-family:serif;font-size:24px">Rx:</h3>
+  <div id="print-meds" style="min-height:250px;white-space:pre-line;line-height:1.8;font-size:16px;padding-right:15px">
+    </div>
+
+  <div style="border-top:1px solid #ccc;padding-top:10px;margin-top:30px;text-align:center;font-size:12px;color:#999">
+    تمنياتنا بالشفاء العاجل لمرضانا الكرام.
+  </div>
+</div>
+
+
+<script>
+var firebaseConfig = {
+  apiKey: "AIzaSyCMRigEePTR9zhK13Dh-CTx282vtd_q2N4",
+  databaseURL: "https://pro-dent-3c752-default-rtdb.firebaseio.com",
+  projectId: "pro-dent-3c752"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+
+// قفل الأمان التلقائي عند فتح الصفحة
+document.getElementById('admin-box').classList.add('hidden');
+
+function login(){
+  if(document.getElementById('pass').value === "1234"){
+    document.getElementById('login-box').classList.add('hidden');
+    document.getElementById('admin-box').classList.remove('hidden');
+  } else { alert("الرقم السري خطأ!"); }
+}
+function logout(){
+  document.getElementById('pass').value="";
+  document.getElementById('login-box').classList.remove('hidden');
+  document.getElementById('admin-box').classList.add('hidden');
+}
+
+// دالة تشغيل وطباعة الروشتة
+function printRx() {
+  var name = document.getElementById('rx-name').value;
+  var age = document.getElementById('rx-age').value;
+  var date = document.getElementById('rx-date').value;
+  var meds = document.getElementById('rx-meds').value;
+
+  if(name && meds) {
+    // نقل البيانات للروشتة القابلة للطباعة
+    document.getElementById('print-name').innerText = name;
+    document.getElementById('print-age').innerText = age ? age : '---';
+    document.getElementById('print-date').innerText = date ? date : new Date().toLocaleDateString('ar-EG');
+    document.getElementById('print-meds').innerText = meds;
+
+    // أمر الطباعة السحري للمتصفح
+    window.print();
+  } else {
+    alert("برجاء كتابة اسم المريض والأدوية أولاً!");
+  }
+}
+
+// سحب وعرض الحجوزات في الجدول
+db.ref('bookings').on('value', function(snapshot) {
+    var tbody = document.getElementById('bookings-list');
+    tbody.innerHTML = '';
+    snapshot.forEach(function(childSnapshot) {
+        var key = childSnapshot.key;
+        var data = childSnapshot.val();
+        var styleStatus = data.status === 'تم التأكيد' ? 'color:#25D366;font-weight:bold' : 'color:#f0ad4e';
+        
+        tbody.innerHTML += '<tr>' +
+            '<td>' + data.name + '</td>' +
+            '<td><a href="tel:'+data.phone+'">' + data.phone + '</a></td>' +
+            '<td>' + data.service + '</td>' +
+            '<td style="' + styleStatus + '">' + data.status + '</td>' +
+            '<td>' +
+               '<button class="btn-done" onclick="confirmBooking(\''+key+'\')">✓</button> ' +
+               '<button class="btn-del" onclick="deleteBooking(\''+key+'\')">✕</button>' +
+            '</td>' +
+        '</tr>';
+    });
+});function confirmBooking(key){ db.ref('bookings/' + key).update({ status: 'تم التأكيد' }); }
+function deleteBooking(key){ if(confirm("هل تريد مسح هذا الحجز؟")){ db.ref('bookings/' + key).remove(); } }
+
+function addPost(){
+  var title = document.getElementById('post-title').value;
+  var body = document.getElementById('post-body').value;
+  if(title && body){
+    db.ref('articles').push({ title: title, body: body });
+    alert("تم إرسال المقال للموقع بنجاح! ✔");
+    document.getElementById('post-title').value = ""; document.getElementById('post-body').value = "";
+  }
+}
+function addCase(){
+  var title = document.getElementById('case-title').value;
+  var imgB = document.getElementById('img-before').value;
+  var imgA = document.getElementById('img-after').value;
+  if(title && imgB && imgA){
+    db.ref('cases').push({ title: title, before: imgB, after: imgA });
+    alert("تم إرسال الحالة للموقع بنجاح! ✔");
+    document.getElementById('case-title').value = ""; document.getElementById('img-before').value = ""; document.getElementById('img-after').value = "";
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="utf-8">
+    <title>PRO DENT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        /* التنسيقات العامة والخلفية */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* الهيدر العلوي */
+        header {
+            background: #112d4e;
+            color: #fff;
+            text-align: center;
+            padding: 20px 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        header h1 { margin: 0; font-size: 26px; letter-spacing: 1px; }
+        header p { margin: 5px 0 0; color: #bbc7d7; font-size: 14px; }
+
+        /* شريط التابات (التنقل) */
+        .nav {
+            display: flex;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow-x: auto;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+            white-space: nowrap;
+            min-width: 80px;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+        }
+        .tab.active {
+            color: #3f72af;
+            border-bottom: 3px solid #3f72af;
+            background-color: #f8fafd;
+        }
+
+        /* الأقسام (المحتوى) */
+        .sec {
+            display: none;
+            padding: 20px 15px;
+            max-width: 500px;
+            margin: auto;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .sec.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* تصميم الكروت */
+        .card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .card h3 {
+            color: #112d4e;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 20px;
+            text-align: center;
+            border-bottom: 2px solid #f4f7f6;
+            padding-bottom: 10px;
+        }
+
+        /* حقول الإدخال */
+        input, select {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border: 1.5px solid #e1e8ed;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 15px;
+            background-color: #f9fbfd;
+            transition: 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3f72af;
+            box-shadow: 0 0 0 3px rgba(63,114,175,0.1);
+            background-color: #fff;
+        }
+
+        /* الأزرار */
+        button, .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            color: #fff;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px;
+            box-sizing: border-box;
+            transition: 0.3s;
+            margin-bottom: 10px;
+        }
+        button[type="submit"] { background: #3f72af; box-shadow: 0 4px 10px rgba(63,114,175,0.3); margin-top: 5px; }
+        button[type="submit"]:active { transform: scale(0.98); }
+        .wa { background: #25D366; box-shadow: 0 4px 10px rgba(37,211,102,0.3); }
+        .fb { background: #1877f2; box-shadow: 0 4px 10px rgba(24,119,242,0.3); }/* شبكة الحالات (الصور) */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid div {
+            background: #fff; border-radius: 12px; padding: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05); text-align: center;
+        }
+        .grid img {
+            width: 100%; height: 120px; background: #ddd;
+            border-radius: 8px; object-fit: cover; margin-bottom: 8px;
+        }
+        .grid p { margin: 5px 0; font-size: 13px; font-weight: bold; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🦷 PRO DENT</h1>
+        <p>د. إبراهيم عبد المحسن</p>
+    </header>
+
+    <div class="nav">
+        <div class="tab active" onclick="show('b',this)">حجز</div>
+        <div class="tab" onclick="show('cases',this)">حالات</div>
+        <div class="tab" onclick="show('a',this)">مقالات</div>
+        <div class="tab" onclick="show('c',this)">تواصل</div>
+    </div>
+
+    <div id="b" class="sec active">
+        <div class="card">
+            <h3>حجز كشف أونلاين</h3>
+            <form onsubmit="saveBooking(event)">
+                <input type="text" id="b-name" placeholder="اسم المريض" required>
+                <input type="tel" id="b-phone" placeholder="رقم الموبايل" required>
+                <select id="b-service" required>
+                    <option value="" disabled selected>نوع الخدمة</option>
+                    <option value="كشف">كشف عادي</option>
+                    <option value="حشو">حشو</option>
+                    <option value="تنظيف">تنظيف جير</option>
+                    <option value="تقويم">تقويم أسنان</option>
+                    <option value="تبييض">تبييض</option>
+                </select>
+                <button type="submit">تأكيد الحجز</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="cases" class="sec">
+        <div class="card">
+            <h3>حالات العيادة (قبل وبعد)</h3>
+            <div id="cases-container" class="grid"></div>
+        </div>
+    </div>
+
+    <div id="a" class="sec">
+        <div class="card">
+            <h3>مقالات طبية</h3>
+            <div id="articles-container"></div>
+        </div>
+    </div>
+
+    <div id="c" class="sec">
+        <div class="card">
+            <h3>تواصل معنا</h3>
+            <a href="https://wa.me/201020526886" class="btn wa">واتساب 💬</a>
+            <a href="https://www.facebook.com/share/1D77VsA9F2/" class="btn fb">فيسبوك 📘</a>
+        </div>
+    </div>
+
+    <script>
+        // دالة التنقل بين الأقسام
+        function show(id, el){
+            document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        // إعدادات فايربيز (نفس الإعدادات بتاعتك بالظبط)
+        var firebaseConfig = {
+            apiKey: "AIzaSyCMRigEePTR9zhk13Dh-CTx282vId_q2N4",
+            databaseURL: "https://pro-dent-3c752-default-rtdb.firebaseio.com",
+            projectId: "pro-dent-3c752"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
+
+        // إرسال الحجز
+        function saveBooking(e) {
+            e.preventDefault();
+            var name = document.getElementById('b-name').value;
+            var phone = document.getElementById('b-phone').value;
+            var service = document.getElementById('b-service').value;
+            
+            db.ref('bookings').push({
+                name: name,
+                phone: phone,
+                service: service,
+                status: "انتظار"
+            }, function(error) {
+                if (!error) {
+                    window.location.href = "success.html";
+                }
+            });
+        }// جلب المقالات
+        db.ref('articles').on('value', function(snapshot) {
+            var container = document.getElementById('articles-container');
+            container.innerHTML = "";
+            snapshot.forEach(function(childSnapshot) {
+                var data = childSnapshot.val();
+                container.innerHTML += '<h4 style="margin:0;color:#3f72af">' + data.title + '</h4><p style="font-size:14px;color:#555;margin-top:5px">' + data.body + '</p><hr>';
+            });
+        });
+
+        // جلب الحالات
+        db.ref('cases').on('value', function(snapshot) {
+            var container = document.getElementById('cases-container');
+            container.innerHTML = "";
+            snapshot.forEach(function(childSnapshot) {
+                var data = childSnapshot.val();
+                container.innerHTML += '<div><img src="' + data.before + '" alt="قبل"><p style="color:#d9534f;font-size:12px;margin:5px">قبل (' + data.title + ')</p></div><div><img src="' + data.after + '" alt="بعد"><p style="color:#5cb85c;font-size:12px;margin:5px">بعد (' + data.title + ')</p></div>';
+            });
+        });
+    </script>
+</body>
+</html>
