@@ -116,15 +116,25 @@
             justify-content: center; align-items: center;
         }
     </style>
-</head>
-<body><div id="lock-screen">
+</head><div id="lock-screen">
         <div class="card" style="width: 90%; max-width: 380px; text-align: center;">
             <h3 style="border:none; margin-bottom:10px;">🔒 لوحة تحكم مغلقة</h3>
             <p style="font-size:14px; color:#666; margin-bottom:20px;">الرجاء إدخال كلمة المرور للدخول</p>
-            <input type="password" id="pass-input" placeholder="كلمة المرور هنا..." style="text-align: center;">
+            <input type="password" id="pass-input" placeholder="كلمة المرور هنا..." style="text-align: center;" onkeypress="if(event.keyCode === 13) checkPassword()">
             <button onclick="checkPassword()">دخول اللوحة 🔑</button>
         </div>
     </div>
+
+    <script>
+        function checkPassword() {
+            var input = document.getElementById('pass-input').value;
+            if(input === "123456") {
+                document.getElementById('lock-screen').style.display = 'none';
+            } else {
+                alert("كلمة المرور خاطئة يا دكتور! حاول مجدداً.");
+            }
+        }
+    </script>
 
     <header>
         <h1>⚙️ لوحة تحكم العيادة</h1>
@@ -168,14 +178,16 @@
                 </select>
 
                 <label>📝 نص الروشتة (Rx):</label>
-                <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea>
-                
-                <button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
+                <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea><button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
             </form>
         </div>
         <div class="card">
             <h3>سجل الروشتات المحفوظة</h3>
-            <div id="prescriptions-list" class="item-list">جاري تحميل السجل...</div><div id="tab-articles" class="sec">
+            <div id="prescriptions-list" class="item-list">جاري تحميل السجل...</div>
+        </div>
+    </div>
+
+    <div id="tab-articles" class="sec">
         <div class="card">
             <h3>إضافة مقال جديد</h3>
             <form onsubmit="addArticle(event)">
@@ -209,15 +221,6 @@
     </div>
 
     <script>
-        function checkPassword() {
-            var input = document.getElementById('pass-input').value;
-            if(input === "123456") {
-                document.getElementById('lock-screen').style.display = 'none';
-            } else {
-                alert("كلمة المرور خاطئة يا دكتور! حاول مجدداً.");
-            }
-        }
-
         function show(id, el){
             var secs = document.querySelectorAll('.sec');
             var tabs = document.querySelectorAll('.tab');
@@ -237,9 +240,13 @@
 
         function deleteItem(nodeName, key) {
             if (confirm("هل أنت متأكد من رغبتك في حذف هذا العنصر نهائياً؟")) {
-                db.ref(nodeName).child(key).remove()
-                .then(function() { alert("تم الحذف بنجاح!"); })
-                .catch(function(err) { alert("حدث خطأ أثناء الحذف: " + err.message); });
+                db.ref(nodeName).child(key).remove(function(error) {
+                    if (error) {
+                        alert("حدث خطأ أثناء الحذف: " + error.message);
+                    } else {
+                        alert("تم الحذف بنجاح!");
+                    }
+                });
             }
         }
 
@@ -260,10 +267,10 @@
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>👤 المريض: ' + (data.name || "بدون اسم") + '</h4>' +'<p>📞 الموبايل: <a href="tel:' + data.phone + '">' + data.phone + '</a></p>' +
+                container.innerHTML += '<div class="item-box">' +'<h4>👤 المريض: ' + (data.name || "بدون اسم") + '</h4>' +
+                    '<p>📞 الموبايل: <a href="tel:' + data.phone + '">' + data.phone + '</a></p>' +
                     '<p>🦷 الخدمة: <span class="badge">' + data.service + '</span></p>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
+                    '<button class="btn-delete" onclick="deleteItem(' + "'bookings'" + ',' + "'" + key + "'" + ')">مسح الحجز 🗑️</button>' +
                     '</div>';
             });
         });
@@ -308,19 +315,18 @@
                     alert("حدث خطأ في حفظ الروشتة!");
                 }
             });
-        }
-
-        db.ref('prescriptions').on('value', function(snapshot) {var container = document.getElementById('prescriptions-list');
+        }db.ref('prescriptions').on('value', function(snapshot) {
+            var container = document.getElementById('prescriptions-list');
             container.innerHTML = "";
             if(!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ حالياً."; return; }
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
                 container.innerHTML += '<div class="item-box">' +
-                    '<h4>👤 المريض: ' + (data.name ⠵⠵⠞⠞⠟⠟⠺⠵⠟⠟⠵⠟⠺⠟⠞⠟⠵⠞⠞⠺⠺⠞⠟⠺⠞⠺⠺⠞⠺⠞⠞⠟⠞⠟⠵⠟⠺⠺ "0") + ')</h4>' +
+                    '<h4>👤 المريض: ' + (data.name ⠞⠺⠺⠺⠺⠺⠟⠞⠞⠟⠟⠵⠞⠺⠞⠟⠞⠺⠵⠟⠺⠵⠟⠞⠟⠟⠵⠞⠞⠺⠺⠟⠞⠵⠵⠺⠞⠟ "0") + ')</h4>' +
                     '<p style="font-size:12px; color:#888;">📅 التاريخ: ' + data.date + '</p>' +
                     '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; border-radius:5px; font-weight:bold;">' + data.body + '</pre>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
+                    '<button class="btn-delete" onclick="deleteItem(' + "'prescriptions'" + ',' + "'" + key + "'" + ')">حذف الروشتة 🗑️</button>' +
                     '</div>';
             });
         });
@@ -351,12 +357,12 @@
                 container.innerHTML += '<div class="item-box">' +
                     '<h4>' + (data.title || "بدون عنوان") + '</h4>' +
                     '<p>' + shortTxt + '</p>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'articles\', \'' + key + '\')">حذف المقال 🗑️</button>' +
+                    '<button class="btn-delete" onclick="deleteItem(' + "'articles'" + ',' + "'" + key + "'" + ')">حذف المقال 🗑️</button>' +
                     '</div>';
             });
         });
 
-        // دالة ضغط الصور الكلاسيكية بدون استخدام Promise نهائياً لضمان التوافقية
+        // دالة ضغط الصور
         function compressAndConvert(file, callback) {
             var reader = new FileReader();
             reader.readAsDataURL(file);
@@ -384,8 +390,8 @@
         }
 
         // 4. إدارة الحالات
-        function addCase(e) {
-            e.preventDefault();var btn = document.getElementById('submit-case-btn');
+        function addCase(e) {e.preventDefault();
+            var btn = document.getElementById('submit-case-btn');
             var title = document.getElementById('case-title').value;
             var beforeFile = document.getElementById('case-before').files[0];
             var afterFile = document.getElementById('case-after').files[0];
@@ -420,12 +426,11 @@
                 var data = childSnapshot.val() || {};
                 container.innerHTML += '<div class="item-box">' +
                     '<h4>' + (data.title || "حالة بدون اسم") + '</h4>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
+                    '<button class="btn-delete" onclick="deleteItem(' + "'cases'" + ',' + "'" + key + "'" + ')">حذف الحالة 🗑️</button>' +
                     '</div>';
             });
         });
     </script>
 </body>
 </html>
-        </div>
-    </div>
+<body>
