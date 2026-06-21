@@ -1,3 +1,4 @@
+> Hema:
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -117,7 +118,10 @@
         }
     </style>
 </head>
-<body><div id="lock-screen">
+<body>
+
+> Hema:
+<div id="lock-screen">
         <div class="card" style="width: 90%; max-width: 380px; text-align: center;">
             <h3 style="border:none; margin-bottom:10px;">🔒 لوحة تحكم مغلقة</h3>
             <p style="font-size:14px; color:#666; margin-bottom:20px;">الرجاء إدخال كلمة المرور للدخول</p>
@@ -175,7 +179,12 @@
         </div>
         <div class="card">
             <h3>سجل الروشتات المحفوظة</h3>
-            <div id="prescriptions-list" class="item-list">جاري تحميل السجل...</div><div id="tab-articles" class="sec">
+            <div id="prescriptions-list" class="item-list">جاري تحميل السجل...</div>
+        </div>
+    </div>
+
+> Hema:
+<div id="tab-articles" class="sec">
         <div class="card">
             <h3>إضافة مقال جديد</h3>
             <form onsubmit="addArticle(event)">
@@ -209,7 +218,6 @@
     </div>
 
     <script>
-        // دالة التحقق من كلمة المرور
         function checkPassword() {
             var input = document.getElementById('pass-input').value;
             if(input === "123456") {
@@ -219,7 +227,6 @@
             }
         }
 
-        // دالة التنقل الكلاسيكية الآمنة
         function show(id, el){
             var secs = document.querySelectorAll('.sec');
             var tabs = document.querySelectorAll('.tab');
@@ -229,7 +236,6 @@
             el.classList.add('active');
         }
 
-        // إعدادات الـ Firebase
         var firebaseConfig = {
             apiKey: "AIzaSyCMRigEePTR9zhk13Dh-CTx282vId_q2N4",
             databaseURL: "https://pro-dent-3c752-default-rtdb.firebaseio.com",
@@ -238,7 +244,6 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
 
-        // دالة الحذف العامة
         function deleteItem(nodeName, key) {
             if (confirm("هل أنت متأكد من رغبتك في حذف هذا العنصر نهائياً؟")) {
                 db.ref(nodeName).child(key).remove()
@@ -247,7 +252,6 @@
             }
         }
 
-        // إضافة الدواء المختار للـ Textarea
         function addMedToText() {
             var select = document.getElementById('med-select');
             var textarea = document.getElementById('presc-body');
@@ -263,17 +267,20 @@
             container.innerHTML = "";
             if(!snapshot.exists()) { container.innerHTML = "لا توجد حجوزات حالياً."; return; }
             snapshot.forEach(function(childSnapshot) {
-                var key = childSnapshot.key;var data = childSnapshot.val();
+                var key = childSnapshot.key;
+                var data = childSnapshot.val() || {};
                 container.innerHTML += '<div class="item-box">' +
                     '<h4>👤 المريض: ' + (data.name || "بدون اسم") + '</h4>' +
-                    '<p>📞 الموبايل: <a href="tel:' + data.phone + '">' + data.phone + '</a></p>' +
+
+> Hema:
+'<p>📞 الموبايل: <a href="tel:' + data.phone + '">' + data.phone + '</a></p>' +
                     '<p>🦷 الخدمة: <span class="badge">' + data.service + '</span></p>' +
                     '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
                     '</div>';
             });
         });
 
-        // 2. حفظ وطباعة الروشتة
+        // 2. الروشتات
         function saveAndPrintPrescription(e) {
             e.preventDefault();
             var name = document.getElementById('presc-name').value;
@@ -313,16 +320,19 @@
                     alert("حدث خطأ في حفظ الروشتة!");
                 }
             });
-        }// جلب سجل الروشتات
+        }
+
         db.ref('prescriptions').on('value', function(snapshot) {
-            var container = document.getElementById('prescriptions-list');
+
+> Hema:
+var container = document.getElementById('prescriptions-list');
             container.innerHTML = "";
             if(!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ حالياً."; return; }
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
-                var data = childSnapshot.val();
+                var data = childSnapshot.val() || {};
                 container.innerHTML += '<div class="item-box">' +
-                    '<h4>👤 المريض: ' + data.name + ' (السن: ' + data.age + ')</h4>' +
+                    '<h4>👤 المريض: ' + (data.name ⠞⠺⠟⠟⠺⠵⠞⠵⠺⠵⠵⠵⠟⠟⠺⠟⠞⠞⠺⠵⠟⠟⠟⠟⠞⠟⠺⠵⠞⠟⠞⠞⠞⠞⠞⠺⠞⠺ "0") + ')</h4>' +
                     '<p style="font-size:12px; color:#888;">📅 التاريخ: ' + data.date + '</p>' +
                     '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; border-radius:5px; font-weight:bold;">' + data.body + '</pre>' +
                     '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
@@ -330,7 +340,7 @@
             });
         });
 
-        // 3. إدارة المقالات
+        // 3. المقالات
         function addArticle(e) {
             e.preventDefault();
             var title = document.getElementById('art-title').value;
@@ -350,7 +360,7 @@
             if(!snapshot.exists()) { container.innerHTML = "لا توجد مقالات منشورة."; return; }
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
-                var data = childSnapshot.val();
+                var data = childSnapshot.val() || {};
                 var txt = data.body ? data.body.toString() : "";
                 var shortTxt = txt.length > 60 ? txt.substring(0, 60) + "..." : txt;
                 container.innerHTML += '<div class="item-box">' +
@@ -361,38 +371,39 @@
             });
         });
 
-        // دالة ضغط الصور
-        function compressAndConvert(file) {
-            return new Promise(function(resolve, reject) {
-                var reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = function (event) {
-                    var img = new Image();
-                    img.src = event.target.result;
-                    img.onload = function () {
-                        var canvas = document.createElement('canvas');
-                        var max_size = 500;
-                        var width = img.width;
-                        var height = img.height;
-                        if (width > height) {
-                            if (width > max_size) { height *= max_size / width; width = max_size; }
-                        } else {
-                            if (height > max_size) { width *= max_size / height; height = max_size; }
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        var ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                        resolve(dataUrl);
-                    };
+        // دالة ضغط الصور الكلاسيكية بدون استخدام Promise نهائياً لضمان التوافقية
+        function compressAndConvert(file, callback) {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (event) {
+                var img = new Image();
+                img.src = event.target.result;
+                img.onload = function () {
+                    var canvas = document.createElement('canvas');
+                    var max_size = 500;
+                    var width = img.width;
+                    var height = img.height;
+                    if (width > height) {
+                        if (width > max_size) { height *= max_size / width; width = max_size; }
+                    } else {
+                        if (height > max_size) { width *= max_size / height; height = max_size; }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                    callback(dataUrl);
                 };
-                reader.onerror = function(error) { reject(error); };
-            });
-        }// 4. إدارة الحالات بالصور المباشرة
+            };
+        }
+
+        // 4. إدارة الحالات
         function addCase(e) {
             e.preventDefault();
-            var btn = document.getElementById('submit-case-btn');
+
+> Hema:
+var btn = document.getElementById('submit-case-btn');
             var title = document.getElementById('case-title').value;
             var beforeFile = document.getElementById('case-before').files[0];
             var afterFile = document.getElementById('case-after').files[0];
@@ -400,8 +411,8 @@
             btn.disabled = true;
             btn.innerText = "جاري معالجة وضغط الصور... انتظر ثواني ⏳";
 
-            compressAndConvert(beforeFile).then(function(beforeBase64) {
-                return compressAndConvert(afterFile).then(function(afterBase64) {
+            compressAndConvert(beforeFile, function(beforeBase64) {
+                compressAndConvert(afterFile, function(afterBase64) {
                     db.ref('cases').push({
                         title: title, before: beforeBase64, after: afterBase64
                     }, function(err){
@@ -415,10 +426,6 @@
                         }
                     });
                 });
-            }).catch(function(error) {
-                alert("خطأ في قراءة الصور، حاول مجدداً.");
-                btn.disabled = false;
-                btn.innerText = "نشر الحالة في العيادة 📸";
             });
         }
 
@@ -428,7 +435,7 @@
             if(!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
-                var data = childSnapshot.val();
+                var data = childSnapshot.val() || {};
                 container.innerHTML += '<div class="item-box">' +
                     '<h4>' + (data.title || "حالة بدون اسم") + '</h4>' +
                     '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
@@ -438,5 +445,3 @@
     </script>
 </body>
 </html>
-        </div>
-    </div>
