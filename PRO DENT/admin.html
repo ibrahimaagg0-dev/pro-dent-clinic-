@@ -122,6 +122,7 @@
             font-size: 12px;
             font-weight: bold;
         }
+        
     </style>
 </head>
 <body>
@@ -134,7 +135,8 @@
         <div class="tab active" onclick="show('tab-bookings',this)">الحجوزات</div>
         <div class="tab" onclick="show('tab-articles',this)">المقالات</div>
         <div class="tab" onclick="show('tab-cases',this)">الحالات</div>
-    </div><div id="tab-bookings" class="sec active">
+    </div>
+    <div id="tab-bookings" class="sec active">
         <div class="card">
             <h3>قائمة الحجوزات الحالية</h3>
             <div id="bookings-list" class="item-list">جاري تحميل الحجوزات...</div>
@@ -178,9 +180,12 @@
     </div>
 
     <script>
+        // دالة التنقل متوافقة مع كل الأجهزة القديمة والجديدة
         function show(id, el){
-            document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            var secs = document.querySelectorAll('.sec');
+            var tabs = document.querySelectorAll('.tab');
+            for(var i=0; i<secs.length; i++) { secs[i].classList.remove('active'); }
+            for(var j=0; j<tabs.length; j++) { tabs[j].classList.remove('active'); }
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
         }
@@ -197,12 +202,12 @@
         function deleteItem(nodeName, key) {
             if (confirm("هل أنت متأكد من رغبتك في حذف هذا العنصر نهائياً؟")) {
                 db.ref(nodeName).child(key).remove()
-                .then(() => alert("تم الحذف بنجاح!"))
-                .catch((err) => alert("حدث خطأ أثناء الحذف: " + err.message));
+                .then(function() { alert("تم الحذف بنجاح!"); })
+                .catch(function(err) { alert("حدث خطأ أثناء الحذف: " + err.message); });
             }
         }
 
-        // 1. الحجوزات
+        // 1. جلب الحجوزات بالتوافقية الكلاسيكية
         db.ref('bookings').on('value', function(snapshot) {
             var container = document.getElementById('bookings-list');
             container.innerHTML = "";
@@ -210,30 +215,104 @@
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val();
-                container.innerHTML += 
-                    <div class="item-box">
-                        <h4>👤 المريض: ${data.name}</h4>
-                        <p>📞 الموبايل: <a href="tel:${data.phone}">${data.phone}</a></p>
-                        <p>🦷 الخدمة: <span class="badge">${data.service}</span></p>
-                        <button class="btn-delete" onclick="deleteItem('bookings', '${key}')">مسح الحجز 🗑️</button>
-                    </div>;
+                container.innerHTML += '<div class="item-box">' +
+                    '<h4>👤 المريض: ' + data.name + '</h4>' +
+                    '<p>📞 الموبايل: <a href="tel:' + data.phone + '">' + data.phone + '</a></p>' +
+                    '<p>🦷 الخدمة: <span class="badge">' + data.service + '</span></p>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
+                    '</div>';
+            });
+        });// 2. إدارة المقالات
+        function addArticle(e) {
+            e.preventDefault();
+            var title = document.getElementById('art-title').value;
+            var body = document.getElementById('art-body').value;
+            db.ref('articles').push({ title: title, body: body }, function(err){
+                if(!err) {
+                    alert("تم نشر المقال بنجاح!");
+                    document.getElementById('art-title').value = "";
+                    document.getElementById('art-body').value = "";
+                }
+            });
+        }
+
+        db.ref('articles').on('value', function(snapshot) {
+            var container = document.getElementById('articles-list');
+            container.innerHTML = "";
+            if(!snapshot.exists()) { container.innerHTML = "لا توجد مقالات منشورة."; return; }
+            snapshot.forEach(function(childSnapshot) {
+                var key = childSnapshot.key;
+                var data = childSnapshot.val();
+                container.innerHTML += '<div class="item-box">' +
+                    '<h4>' + data.title + '</h4>' +
+                    '<p>' + data.body.substring(0, 60) + '...</p>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'articles\', \'' + key + '\')">حذف المقال 🗑️</button>' +
+                    '</div>';
             });
         });
 
-        // 2. المقالات
-        function addArticle(e) {
-            e.preventDefault();if(!err) {
-                        alert("تم رفع صور الحالة ونشرها بنجاح! 🎉");
-                        document.getElementById('case-form').reset();
-                    } else {
-                        alert("حدث خطأ أثناء الحفظ: " + err.message);
-                    }
+        // دالة ضغط الصور متوافقة بالكامل ES5 بدون async/await
+        function compressAndConvert(file) {
+            return new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function (event) {
+                    var img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function () {
+                        var canvas = document.createElement('canvas');
+                        var max_size = 500;
+                        var width = img.width;
+                        var height = img.height;
+                        if (width > height) {
+                            if (width > max_size) { height *= max_size / width; width = max_size; }
+                        } else {
+                            if (height > max_size) { width *= max_size / height; height = max_size; }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                        resolve(dataUrl);
+                    };
+                };
+                reader.onerror = function(error) { reject(error); };
+            });
+        }
+
+        // 3. رفع الحالة بدون كود حديث يسبب تعليق الشاشة
+        function addCase(e) {
+            e.preventDefault();
+            var btn = document.getElementById('submit-case-btn');
+            var title = document.getElementById('case-title').value;
+            var beforeFile = document.getElementById('case-before').files[0];
+            var afterFile = document.getElementById('case-after').files[0];
+
+            btn.disabled = true;
+            btn.innerText = "جاري معالجة وضغط الصور... انتظر ثواني ⏳";
+
+            compressAndConvert(beforeFile).then(function(beforeBase64) {
+                return compressAndConvert(afterFile).then(function(afterBase64) {
+                    db.ref('cases').push({
+                        title: title,
+                        before: beforeBase64,
+                        after: afterBase64
+                    }, function(err){
+                        btn.disabled = false;
+                        btn.innerText = "نشر الحالة في العيادة 📸";
+                        if(!err) {alert("تم رفع صور الحالة ونشرها بنجاح! 🎉");
+                            document.getElementById('case-form').reset();
+                        } else {
+                            alert("حدث خطأ أثناء الحفظ: " + err.message);
+                        }
+                    });
                 });
-            } catch (error) {
-                alert("خطأ في قراءة الصور، تأكد من جودتها وحاول مجدداً.");
+            }).catch(function(error) {
+                alert("خطأ في قراءة الصور، حاول مجدداً.");
                 btn.disabled = false;
                 btn.innerText = "نشر الحالة في العيادة 📸";
-            }
+            });
         }
 
         db.ref('cases').on('value', function(snapshot) {
@@ -243,11 +322,10 @@
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val();
-                container.innerHTML += 
-                    <div class="item-box">
-                        <h4>${data.title}</h4>
-                        <button class="btn-delete" onclick="deleteItem('cases', '${key}')">حذف الحالة 🗑️</button>
-                    </div>;
+                container.innerHTML += '<div class="item-box">' +
+                    '<h4>' + data.title + '</h4>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
+                    '</div>';
             });
         });
     </script>
