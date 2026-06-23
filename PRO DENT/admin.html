@@ -4,8 +4,17 @@
     <meta charset="utf-8">
     <title>لوحة التحكم - PRO DENT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script>
+        window.onerror = function(msg, url, line) {
+            alert("تنبيه من السيستم: " + msg + "\nفي السطر: " + line);
+            return false;
+        };
+    </script>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -110,27 +119,12 @@
             font-size: 12px;
             font-weight: bold;
         }
-        
-        /* شاشة تسجيل الدخول الفخمة والأمنة */
-        #login-screen {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: linear-gradient(135deg, #112d4e 0%, #1a4473 100%);z-index: 99999; display: flex; justify-content: center; align-items: center;
-        }
-        .login-card {
-            background: #fff; padding: 35px 25px; border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 90%; max-width: 360px;
-            text-align: center;
-        }
     </style>
-
     <script>
-        function checkPassword() {
-            var input = document.getElementById('pass-input').value;
-            if (input === "123456") {
-                document.getElementById('login-screen').style.display = 'none';
-            } else {
-                alert("كلمة المرور خاطئة يا دكتور! حاول مجدداً.");
-            }
+        var pass = prompt("🔐 لوحة تحكم عيادة PRO DENT\n\nبرجاء إدخال كلمة المرور للدخول يا دكتور إبراهيم:");
+        if (pass !== "123456") {
+            alert("كلمة المرور خاطئة!");
+            window.location.href = "https://ibrahimaagg0-dev.github.io/pro-dent-clinic-/";
         }
 
         function show(id, el) {
@@ -151,16 +145,6 @@
     </script>
 </head>
 <body>
-
-    <div id="login-screen">
-        <div class="login-card">
-            <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
-            <h2 style="color: #112d4e; margin: 0 0 5px 0; font-size: 22px;">لوحة تحكم PRO DENT</h2>
-            <p style="font-size:13px; color:#666; margin-bottom:25px;">مرحباً دكتور إبراهيم، يرجى كتابة الباسورد</p>
-            <input type="password" id="pass-input" placeholder="أدخل كلمة المرور هنا..." style="text-align: center; font-size: 16px; letter-spacing: 4px;" onkeypress="if(event.keyCode === 13) checkPassword()">
-            <button onclick="checkPassword()" style="background: #112d4e; font-size: 15px;">دخول لوحة التحكم 🔑</button>
-        </div>
-    </div>
 
     <header>
         <h1>⚙️ لوحة تحكم العيادة</h1>
@@ -193,7 +177,8 @@
                     <option value="Augmentin 1g tab. (1 tablet every 12 hours)">Augmentin 1g (مضاد حيوي قوي)</option>
                     <option value="Amoxicillin 500mg cap. (1 capsule every 8 hours)">Amoxicillin 500mg (مضاد حيوي)</option>
                     <option value="Dalacin C 300mg cap. (1 capsule every 8 hours)">Dalacin C 300mg (مضاد حيوي للحساسية)</option>
-                    <option value="Flagyl 500mg tab. (1 tablet every 8 hours)">Flagyl 500mg (مضاد لاتهاب اللثة)</option><option value="Cataflam 50mg tab. (1 tablet every 8 hours after meals)">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
+                    <option value="Flagyl 500mg tab. (1 tablet every 8 hours)">Flagyl 500mg (مضاد لاتهاب اللثة)</option>
+                    <option value="Cataflam 50mg tab. (1 tablet every 8 hours after meals)">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
                     <option value="Brufen 600mg tab. (1 tablet every 8 hours after meals)">Brufen 600mg (مسكن قوي)</option>
                     <option value="Ketofan 50mg cap. (1 capsule every 8 hours)">Ketofan 50mg (مسكن آلام فوري)</option>
                     <option value="Panadol Advance 500mg tab. (2 tablets when necessary)">Panadol Advance (مسكن آمن)</option>
@@ -203,9 +188,7 @@
                 </select>
 
                 <label>📝 نص الروشتة (Rx):</label>
-                <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea>
-                
-                <button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
+                <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea><button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
             </form>
         </div>
         <div class="card">
@@ -272,7 +255,9 @@
                     if (!error) alert("تم الحذف بنجاح!");
                 });
             }
-        }function addMedToText() {
+        }
+
+        function addMedToText() {
             var select = document.getElementById('med-select');
             var textarea = document.getElementById('presc-body');
             if (select.value !== "") {
@@ -284,17 +269,17 @@
         // 1. جلب الحجوزات
         db.ref('bookings').on('value', function(snapshot) {
             var container = document.getElementById('bookings-list');
+            if (!container) return;
             container.innerHTML = "";
             if (!snapshot.exists()) { container.innerHTML = "لا توجد حجوزات حالياً."; return; }
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>👤 المريض: ' + safeTxt(data.name || "بدون اسم") + '</h4>' +
-                    '<p>📞 الموبايل: <a href="tel:' + safeTxt(data.phone) + '">' + safeTxt(data.phone || "لا يوجد") + '</a></p>' +
-                    '<p>🦷 الخدمة: <span class="badge">' + safeTxt(data.service || "كشف") + '</span></p>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
-                    '</div>';
+                container.innerHTML += "<div class='item-box'>" +
+                    "<h4>👤 المريض: " + safeTxt(data.name || "بدون اسم") + "</h4>" +
+                    "<p>📞 الموبايل: <a href='tel:" + safeTxt(data.phone) + "'>" + safeTxt(data.phone || "لا يوجد") + "</a></p>" +"<p>🦷 الخدمة: <span class='badge'>" + safeTxt(data.service || "كشف") + "</span></p>" +
+                    "<button class='btn-delete' onclick='deleteItem(\"bookings\", \"" + key + "\")'>مسح الحجز 🗑️</button>" +
+                    "</div>";
             });
         });
 
@@ -337,22 +322,23 @@
                     pWin.print();
                 }
             });
-        }db.ref('prescriptions').on('value', function(snapshot) {
+        }
+
+        db.ref('prescriptions').on('value', function(snapshot) {
             var container = document.getElementById('prescriptions-list');
+            if (!container) return;
             container.innerHTML = "";
             if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ حالياً."; return; }
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>👤 المريض: ' + safeTxt(data.name ⠟⠺⠞⠟⠟⠵⠺⠵⠞⠟⠟⠺⠺⠵⠵⠵⠺⠟⠵⠟⠺⠟⠟⠟⠺⠞⠞⠺⠟⠵⠺⠟⠞⠵⠵⠵⠟⠞⠞⠟⠺⠵⠺⠵⠟ "0") + ')</h4>' +
-                    '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold;">' + safeTxt(data.body) + '</pre>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
-                    '</div>';
+                container.innerHTML += "<div class='item-box'>" +
+                    "<h4>👤 المريض: " + safeTxt(data.name ⠺⠺⠺⠵⠺⠺⠵⠟⠺⠟⠟⠟⠺⠟⠟⠟⠵⠟⠵⠵⠞⠵⠵⠞⠵⠞⠞⠞⠞⠺⠟⠞⠺⠺⠞⠵⠺⠵⠟⠵⠞⠺⠵⠺⠺ "0") + ")</h4>" +
+                    "<pre style='direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;'>" + safeTxt(data.body) + "</pre>" +
+                    "<button class='btn-delete' onclick='deleteItem(\"prescriptions\", \"" + key + "\")'>حذف الروشتة 🗑️</button>" +
+                    "</div>";
             });
-        });
-
-        // 3. المقالات
+        });// 3. المقالات
         function addArticle(e) {
             e.preventDefault();
             var title = document.getElementById('art-title').value;
@@ -368,6 +354,7 @@
 
         db.ref('articles').on('value', function(snapshot) {
             var container = document.getElementById('articles-list');
+            if (!container) return;
             container.innerHTML = "";
             if (!snapshot.exists()) { container.innerHTML = "لا توجد مقالات منشورة."; return; }
             snapshot.forEach(function(childSnapshot) {
@@ -375,11 +362,11 @@
                 var data = childSnapshot.val() || {};
                 var txt = data.body ? data.body.toString() : "";
                 var shortTxt = txt.length > 60 ? txt.substring(0, 60) + "..." : txt;
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>' + safeTxt(data.title || "بدون عنوان") + '</h4>' +
-                    '<p>' + safeTxt(shortTxt) + '</p>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'articles\', \'' + key + '\')">حذف المقال 🗑️</button>' +
-                    '</div>';
+                container.innerHTML += "<div class='item-box'>" +
+                    "<h4>" + safeTxt(data.title || "بدون عنوان") + "</h4>" +
+                    "<p>" + safeTxt(shortTxt) + "</p>" +
+                    "<button class='btn-delete' onclick='deleteItem(\"articles\", \"" + key + "\")'>حذف المقال 🗑️</button>" +
+                    "</div>";
             });
         });
 
@@ -416,7 +403,9 @@
             var btn = document.getElementById('submit-case-btn');
             var title = document.getElementById('case-title').value;
             var beforeFile = document.getElementById('case-before').files[0];
-            var afterFile = document.getElementById('case-after').files[0];btn.disabled = true;
+            var afterFile = document.getElementById('case-after').files[0];
+
+            btn.disabled = true;
             btn.innerText = "جاري معالجة الصور... انتظر ثواني ⏳";
 
             compressAndConvert(beforeFile, function(beforeBase64) {
@@ -433,19 +422,18 @@
                     });
                 });
             });
-        }
-
-        db.ref('cases').on('value', function(snapshot) {
+        }db.ref('cases').on('value', function(snapshot) {
             var container = document.getElementById('cases-list');
+            if (!container) return;
             container.innerHTML = "";
             if (!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>' + safeTxt(data.title || "بدون اسم") + '</h4>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
-                    '</div>';
+                container.innerHTML += "<div class='item-box'>" +
+                    "<h4>" + safeTxt(data.title || "بدون اسم") + "</h4>" +
+                    "<button class='btn-delete' onclick='deleteItem(\'cases\', \'' + key + '\')\'>حذف الحالة 🗑️</button>" +
+                    "</div>";
             });
         });
     </script>
