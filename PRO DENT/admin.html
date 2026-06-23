@@ -163,22 +163,21 @@
                 <label>💊 أدوية أسنان شائعة (اختر للإضافة التلقائية):</label>
                 <select id="med-select" onchange="addMedToText()">
                     <option value="">-- اختر دواء لإضافته للروشتة --</option>
-                    <option value="Augmentin 1g tab.\nSig: 1 tablet every 12 hours.">Augmentin 1g (مضاد حيوي قوي)</option>
-                    <option value="Amoxicillin 500mg cap.\nSig: 1 capsule every 8 hours.">Amoxicillin 500mg (مضاد حيوي)</option>
-                    <option value="Dalacin C 300mg cap.\nSig: 1 capsule every 8 hours.">Dalacin C 300mg (مضاد حيوي لحساسية البنسلين)</option>
-                    <option value="Flagyl 500mg tab.\nSig: 1 tablet every 8 hours (for gum).">Flagyl 500mg (مضاد للفطريات/التهاب اللثة)</option>
-                    <option value="Cataflam 50mg tab.\nSig: 1 tablet every 8 hours after meals.">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
-                    <option value="Brufen 600mg tab.\nSig: 1 tablet every 8 hours after meals.">Brufen 600mg (مسكن قوي وعضلات)</option>
-                    <option value="Ketofan 50mg cap.\nSig: 1 capsule every 8 hours.">Ketofan 50mg (مسكن للآلام)</option>
-                    <option value="Panadol Advance 500mg tab.\nSig: 2 tablets when necessary.">Panadol Advance (مسكن آمن)</option>
-                    <option value="Ambezim-G tab.\nSig: 1 tablet 3 times daily (1 hour before meals).">Ambezim-G (مضاد للتورم والالتهابات)</option>
-                    <option value="Oraxine Mouthwash.\nSig: Rinse 3 times daily for 30 seconds.">Oraxine Mouthwash (مضمضة مطهرة للثة)</option>
-                    <option value="Daktarin Oral Gel.\nSig: Apply to oral cavity 4 times daily.">Daktarin Oral Gel (جل لفطريات الفم)</option>
+                    <option value="Augmentin 1g tab. (1 tablet every 12 hours)">Augmentin 1g (مضاد حيوي قوي)</option>
+                    <option value="Amoxicillin 500mg cap. (1 capsule every 8 hours)">Amoxicillin 500mg (مضاد حيوي)</option>
+                    <option value="Dalacin C 300mg cap. (1 capsule every 8 hours)">Dalacin C 300mg (مضاد حيوي للحساسية)</option>
+                    <option value="Flagyl 500mg tab. (1 tablet every 8 hours)">Flagyl 500mg (مضاد لاتهاب اللثة)</option>
+                    <option value="Cataflam 50mg tab. (1 tablet every 8 hours after meals)">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
+                    <option value="Brufen 600mg tab. (1 tablet every 8 hours after meals)">Brufen 600mg (مسكن قوي)</option>
+                    <option value="Ketofan 50mg cap. (1 capsule every 8 hours)">Ketofan 50mg (مسكن آلام فوري)</option>
+                    <option value="Panadol Advance 500mg tab. (2 tablets when necessary)">Panadol Advance (مسكن آمن)</option>
+                    <option value="Ambezim-G tab. (1 tablet 3 times daily - 1 hour before meals)">Ambezim-G (مضاد للتورم)</option>
+                    <option value="Oraxine Mouthwash (Rinse 3 times daily for 30 seconds)">Oraxine Mouthwash (مضمضة مطهرة)</option>
+                    <option value="Daktarin Oral Gel (Apply 4 times daily)">Daktarin Oral Gel (جل للفطريات)</option>
                 </select>
+
                 <label>📝 نص الروشتة (Rx):</label>
-                <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea>
-                
-                <button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
+                <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea><button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
             </form>
         </div>
         <div class="card">
@@ -221,7 +220,6 @@
     </div>
 
     <script>
-        // دالة الدخول بالشاشة الاحترافية
         function checkPassword() {
             var input = document.getElementById('pass-input').value;
             if (input === "123456") {
@@ -231,13 +229,17 @@
             }
         }
 
-        // دالة التنقل الآمنة الكلاسيكية بين التابات
         function show(id, el) {
-            var secs = document.querySelectorAll('.sec');
-            var tabs = document.querySelectorAll('.tab');
-            for (var i = 0; i < secs.length; i++) { secs[i].style.display = 'none'; }
-            for (var j = 0; j < tabs.length; j++) { tabs[j].classList.remove('active'); }
+            var secs = ['tab-bookings', 'tab-prescriptions', 'tab-articles', 'tab-cases'];
+            for (var i = 0; i < secs.length; i++) { 
+                document.getElementById(secs[i]).style.display = 'none'; 
+            }
             document.getElementById(id).style.display = 'block';
+            
+            var tabs = document.querySelectorAll('.tab');
+            for (var j = 0; j < tabs.length; j++) { 
+                tabs[j].classList.remove('active'); 
+            }
             el.classList.add('active');
         }
 
@@ -251,7 +253,6 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // إعدادات الـ Firebase الخاصة بك
         var firebaseConfig = {
             apiKey: "AIzaSyCMRigEePTR9zhk13Dh-CTx282vId_q2N4",
             databaseURL: "https://pro-dent-3c752-default-rtdb.firebaseio.com",
@@ -267,16 +268,16 @@
                 });
             }
         }
+
         function addMedToText() {
             var select = document.getElementById('med-select');
             var textarea = document.getElementById('presc-body');
             if (select.value !== "") {
-                textarea.value += select.value + "\n\n";
+                textarea.value += select.value + "\n";
                 select.value = "";
             }
         }
-
-        // 1. جلب الحجوزات (مع زر الحذف المصلح بالملي)
+        // 1. جلب الحجوزات
         db.ref('bookings').on('value', function(snapshot) {
             var container = document.getElementById('bookings-list');
             container.innerHTML = "";
@@ -311,25 +312,22 @@
                     
                     var pWin = window.open('', '_blank');
                     if (!pWin) {
-                        alert("تم حفظ الروشتة بنجاح، ولكن المتصفح منع الطباعة التلقائية.");
+                        alert("تم حفظ الروشتة بنجاح، ولكن المتصفح منع الطباعة.");
                         return;
                     }
-                    var htmlContent = '<html><head><title>روشتة عيادة PRO DENT</title>' +
-                        '<style>' +
-                        'body { font-family: Arial, sans-serif; direction: rtl; padding: 40px; background: #fff; }' +
-                        '.header { text-align: center; border-bottom: 3px double #112d4e; padding-bottom: 15px; margin-bottom: 30px; }' +
-                        '.header h2 { margin: 0 0 5px 0; color: #112d4e; font-size: 26px; }' +
-                        '.header h3 { margin: 5px 0; color: #3f72af; font-size: 20px; }' +
-                        '.header p { margin: 5px 0; font-size: 14px; color: #555; font-weight: bold; }' +
-                        '.info-table { width: 100%; font-size: 16px; margin-bottom: 40px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }' +
-                        '.rx-title { font-size: 28px; font-weight: bold; color: #112d4e; text-align: left; margin-bottom: 15px; font-style: italic; }' +
-                        '.rx-body { direction: ltr; text-align: left; font-size: 19px; line-height: 1.8; min-height: 280px; white-space: pre-wrap; font-weight: bold; padding-left: 15px; }' +
-                        '.footer { text-align: center; margin-top: 40px; border-top: 2px solid #112d4e; padding-top: 10px; font-size: 13px; color: #777; font-weight: bold; }' +
-                        '</style></head><body>' +
-                        '<div class="header"><h2>عيادة PRO DENT لطب وجراحة الأسنان</h2><h3>الدكتور: إبراهيم عبدالمحسن فوزي</h3><p>العنوان: المحلة الكبرى | تليفون: 01020526886</p></div>' +'<table class="info-table"><tr><td><b>اسم المريض:</b> ' + safeTxt(name) + '</td><td><b>السن:</b> ' + safeTxt(age) + ' سنة</td><td style="text-align:left;"><b>التاريخ:</b> ' + safeTxt(dateStr) + '</td></tr></table>' +
-                        '<div class="rx-title">Rx:</div><div class="rx-body">' + safeTxt(body) + '</div>' +
-                        '<div class="footer"><p>تمنياتنا بالشفاء العاجل | يرجى الالتزام التام بالجرعات المحددة من قبل الطبيب.</p></div>' +
-                        '</body></html>';
+                    var htmlContent = "<html><head><title>روشتة عيادة PRO DENT</title>" +
+                        "<style>body{font-family:Arial;direction:rtl;padding:40px;background:#fff;}" +
+                        ".header{text-align:center;border-bottom:3px double #112d4e;padding-bottom:15px;margin-bottom:30px;}" +
+                        ".header h2{margin:0;color:#112d4e;font-size:26px;}" +
+                        ".header h3{margin:5px 0;color:#3f72af;font-size:20px;}" +
+                        ".header p{margin:5px 0;font-size:14px;color:#555;}" +
+                        ".info-table{width:100%;font-size:16px;margin-bottom:40px;border-bottom:1px solid #ccc;}" +
+                        ".rx-body{direction:ltr;text-align:left;font-size:19px;line-height:1.8;min-height:280px;white-space:pre-wrap;font-weight:bold;}" +
+                        "</style></head><body>" +
+                        "<div class='header'><h2>عيادة PRO DENT لطب الأسنان</h2><h3>الدكتور: إبراهيم عبدالمحسن فوزي</h3><p>المحلة الكبرى | تليفون: 01020526886</p></div>" +
+                        "<table class='info-table'><tr><td><b>اسم المريض:</b> " + safeTxt(name) + "</td><td><b>السن:</b> " + safeTxt(age) + " سنة</td><td style='text-align:left;'><b>التاريخ:</b> " + safeTxt(dateStr) + "</td></tr></table>" +
+                        "<h3>Rx:</h3><div class='rx-body'>" + safeTxt(body) + "</div>" +
+                        "</body></html>";
                     pWin.document.write(htmlContent);
                     pWin.document.close();
                     pWin.print();
@@ -339,15 +337,13 @@
 
         db.ref('prescriptions').on('value', function(snapshot) {
             var container = document.getElementById('prescriptions-list');
-            container.innerHTML = "";
-            if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ حالياً."; return; }
+            container.innerHTML = "";if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ حالياً."; return; }
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
                 container.innerHTML += '<div class="item-box">' +
-                    '<h4>👤 المريض: ' + safeTxt(data.name ⠵⠞⠞⠵⠞⠵⠞⠵⠟⠟⠟⠞⠞⠺⠺⠟⠞⠟⠺⠞⠺⠺⠺⠟⠞⠟⠞⠵⠵⠞⠵⠵⠵⠵⠞⠟⠵⠟⠟⠵⠺⠟⠺⠺⠵ "0") + ')</h4>' +
-                    '<p style="font-size:12px; color:#888;">📅 التاريخ: ' + safeTxt(data.date) + '</p>' +
-                    '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; border-radius:5px; font-weight:bold;">' + safeTxt(data.body) + '</pre>' +
+                    '<h4>👤 المريض: ' + safeTxt(data.name ⠞⠺⠵⠞⠵⠞⠺⠟⠺⠟⠞⠵⠟⠺⠺⠞⠟⠺⠺⠞⠟⠺⠞⠵⠞⠺⠺⠺⠵⠺⠟⠞⠞⠞⠵⠵⠺⠺⠟⠟⠟⠟⠟⠵⠞ "0") + ')</h4>' +
+                    '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold;">' + safeTxt(data.body) + '</pre>' +
                     '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
                     '</div>';
             });
@@ -394,7 +390,8 @@
                 img.onload = function () {
                     var canvas = document.createElement('canvas');
                     var max_size = 500;
-                    var width = img.width;var height = img.height;
+                    var width = img.width;
+                    var height = img.height;
                     if (width > height) {
                         if (width > max_size) { height *= max_size / width; width = max_size; }
                     } else {
@@ -419,9 +416,7 @@
             var afterFile = document.getElementById('case-after').files[0];
 
             btn.disabled = true;
-            btn.innerText = "جاري معالجة الصور... انتظر ثواني ⏳";
-
-            compressAndConvert(beforeFile, function(beforeBase64) {
+            btn.innerText = "جاري معالجة الصور... انتظر ثواني ⏳";compressAndConvert(beforeFile, function(beforeBase64) {
                 compressAndConvert(afterFile, function(afterBase64) {
                     db.ref('cases').push({
                         title: title, before: beforeBase64, after: afterBase64
@@ -453,4 +448,3 @@
     </script>
 </body>
 </html>
-        
