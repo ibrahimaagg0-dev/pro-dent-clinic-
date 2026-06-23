@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -126,9 +125,7 @@
     <header>
         <h1>⚙️ لوحة تحكم العيادة</h1>
     </header>
-
-> Hema:
-<div class="nav">
+   <div class="nav">
         <div class="tab active" onclick="show('tab-bookings',this)">الحجوزات</div>
         <div class="tab" onclick="show('tab-prescriptions',this)">الروشتات 📝</div>
         <div class="tab" onclick="show('tab-articles',this)">المقالات</div>
@@ -190,10 +187,8 @@
             <h3>المقالات المنشورة</h3>
             <div id="articles-list" class="item-list">جاري تحميل المقالات...</div>
         </div>
-    </div>
-
-> Hema:
-<div id="tab-cases" class="sec">
+    </div> 
+    <div id="tab-cases" class="sec">
         <div class="card">
             <h3>إضافة حالة جديدة (من الاستوديو علطول)</h3>
             <form id="case-form" onsubmit="addCase(event)">
@@ -221,7 +216,6 @@
             el.classList.add('active');
         }
 
-        // دالة حماية تمنع الداتا البايظة القديمة من ضرب كود الصفحة
         function safeTxt(str) {
             if (!str) return "";
             return str.toString()
@@ -274,16 +268,13 @@
             });
         });
 
-        // 2. الروشتات والطباعة
+        // 2. حفظ وطباعة الروشتة
         function saveAndPrintPrescription(e) {
             e.preventDefault();
             var name = document.getElementById('presc-name').value;
             var age = document.getElementById('presc-age').value;
             var body = document.getElementById('presc-body').value;
-            var dateStr = new Date().toLocaleDateString('ar-EG');
-
-> Hema:
-db.ref('prescriptions').push({
+            var dateStr = new Date().toLocaleDateString('ar-EG');db.ref('prescriptions').push({
                 name: name, age: age, body: body, date: dateStr
             }, function(err) {
                 if (!err) {
@@ -334,10 +325,7 @@ db.ref('prescriptions').push({
                     '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
                     '</div>';
             });
-        });
-
-> Hema:
-// 3. المقالات
+        });// 3. المقالات
         function addArticle(e) {
             e.preventDefault();
             var title = document.getElementById('art-title').value;
@@ -349,7 +337,22 @@ db.ref('prescriptions').push({
                     document.getElementById('art-body').value = "";
                 }
             });
-        }
+        }db.ref('cases').on('value', function(snapshot) {
+            var container = document.getElementById('cases-list');
+            container.innerHTML = "";
+            if (!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }
+            snapshot.forEach(function(childSnapshot) {
+                var key = childSnapshot.key;
+                var data = childSnapshot.val() || {};
+                container.innerHTML += '<div class="item-box">' +
+                    '<h4>' + safeTxt(data.title) + '</h4>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
+                    '</div>';
+            });
+        });
+    </script>
+</body>
+</html>
 
         db.ref('articles').on('value', function(snapshot) {
             var container = document.getElementById('articles-list');
@@ -421,22 +424,3 @@ db.ref('prescriptions').push({
                 });
             });
         }
-
-> Hema:
-db.ref('cases').on('value', function(snapshot) {
-            var container = document.getElementById('cases-list');
-            container.innerHTML = "";
-            if (!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }
-            snapshot.forEach(function(childSnapshot) {
-                var key = childSnapshot.key;
-                var data = childSnapshot.val() || {};
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>' + safeTxt(data.title) + '</h4>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
-                    '</div>';
-            });
-        });
-    </script>
-</body>
-</html>
- 
