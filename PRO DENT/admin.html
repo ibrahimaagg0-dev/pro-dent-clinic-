@@ -4,8 +4,10 @@
     <meta charset="utf-8">
     <title>لوحة التحكم - PRO DENT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -114,7 +116,7 @@
         #login-screen {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: linear-gradient(135deg, #112d4e 0%, #1a4473 100%);
-            z-index: 99999; display: flex; justify-content: center; align-items: center;
+            z-index: 999999; display: flex; justify-content: center; align-items: center;
         }
         .login-card {
             background: #fff; padding: 35px 25px; border-radius: 16px;
@@ -126,6 +128,8 @@
             var input = document.getElementById('pass-input').value;
             if (input === "123456") {
                 document.getElementById('login-screen').style.display = 'none';
+                // تشغيل جلب البيانات فقط بعد نجاح الدخول لضمان عدم التعليق
+                startFirebaseLoad(); 
             } else {
                 alert("كلمة المرور خاطئة يا دكتور إبراهيم! حاول مجدداً.");
             }
@@ -174,7 +178,7 @@
     <div id="b" class="sec active">
         <div class="card">
             <h3>قائمة الحجوزات الحالية</h3>
-            <div id="bookings-list" class="item-list">جاري تحميل الحجوزات...</div>
+            <div id="bookings-list" class="item-list">في انتظار تسجيل الدخول...</div>
         </div>
     </div>
 
@@ -194,8 +198,8 @@
                     <option value="Flagyl 500mg tab.\nSig: 1 tablet every 8 hours.">Flagyl 500mg (مضاد لالتهاب اللثة)</option>
                     <option value="Cataflam 50mg tab.\nSig: 1 tablet every 8 hours after meals.">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
                     <option value="Brufen 600mg tab.\nSig: 1 tablet every 8 hours after meals.">Brufen 600mg (مسكن قوي)</option>
-                    <option value="Ketofan 50mg cap.\nSig: 1 capsule every 8 hours.">Ketofan 50mg (مسكن للآلام)</option>
-                    <option value="Panadol Advance 500mg tab.\nSig: 2 tablets when necessary.">Panadol Advance (مسكن آمن)</option><option value="Ambezim-G tab.\nSig: 1 tablet 3 times daily (1 hour before meals).">Ambezim-G (مضاد للتورم)</option>
+                    <option value="Ketofan 50mg cap.\nSig: 1 capsule every 8 hours.">Ketofan 50mg (مسكن للآلام)</option><option value="Panadol Advance 500mg tab.\nSig: 2 tablets when necessary.">Panadol Advance (مسكن آمن)</option>
+                    <option value="Ambezim-G tab.\nSig: 1 tablet 3 times daily (1 hour before meals).">Ambezim-G (مضاد للتورم)</option>
                     <option value="Oraxine Mouthwash.\nSig: Rinse 3 times daily for 30 seconds.">Oraxine Mouthwash (مضمضة مطهرة)</option>
                     <option value="Daktarin Oral Gel.\nSig: Apply to oral cavity 4 times daily.">Daktarin Oral Gel (جل للفطريات)</option>
                 </select>
@@ -208,7 +212,7 @@
         </div>
         <div class="card">
             <h3>سجل الروشتات المحفوظة</h3>
-            <div id="prescriptions-list" class="item-list">جاري تحميل السجل...</div>
+            <div id="prescriptions-list" class="item-list">في انتظار تسجيل الدخول...</div>
         </div>
     </div>
 
@@ -223,7 +227,7 @@
         </div>
         <div class="card">
             <h3>المقالات المنشورة</h3>
-            <div id="articles-list" class="item-list">جاري تحميل المقالات...</div>
+            <div id="articles-list" class="item-list">في انتظار تسجيل الدخول...</div>
         </div>
     </div>
 
@@ -241,7 +245,7 @@
         </div>
         <div class="card">
             <h3>الحالات المعروضة</h3>
-            <div id="cases-list" class="item-list">جاري تحميل الحالات...</div>
+            <div id="cases-list" class="item-list">في انتظار تسجيل الدخول...</div>
         </div>
     </div>
 
@@ -279,28 +283,81 @@
                 textarea.value += select.value + "\n\n";
                 select.value = "";
             }
+        }// دالة تشغيل السيرفر وجلب البيانات (لا تعمل إلا بعد الباسورد الصحيح)
+        function startFirebaseLoad() {
+            document.getElementById('bookings-list').innerHTML = "جاري تحميل الحجوزات...";
+            document.getElementById('prescriptions-list').innerHTML = "جاري تحميل السجل...";
+            document.getElementById('articles-list').innerHTML = "جاري تحميل المقالات...";
+            document.getElementById('cases-list').innerHTML = "جاري تحميل الحالات...";
+
+            // 1. جلب الحجوزات b
+            db.ref('bookings').on('value', function(snapshot) {
+                var container = document.getElementById('bookings-list');
+                if (!container) return;
+                container.innerHTML = "";
+                if (!snapshot.exists()) { container.innerHTML = "لا توجد حجوزات حالياً."; return; }
+                snapshot.forEach(function(childSnapshot) {
+                    var key = childSnapshot.key;
+                    var data = childSnapshot.val() || {};
+                    container.innerHTML += '<div class="item-box">' +
+                        '<h4>👤 المريض: ' + safeTxt(data.name || "بدون اسم") + '</h4>' +
+                        '<p>📞 الموبايل: <a href="tel:' + safeTxt(data.phone) + '">' + safeTxt(data.phone || "لا يوجد") + '</a></p>' +
+                        '<p>🦷 الخدمة: <span class="badge">' + safeTxt(data.service || "كشف") + '</span></p>' +
+                        '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
+                        '</div>';
+                });
+            });
+
+            // 2. سجل الروشتات p
+            db.ref('prescriptions').on('value', function(snapshot) {
+                var container = document.getElementById('prescriptions-list');
+                if (!container) return;
+                container.innerHTML = "";
+                if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ حالياً."; return; }
+                snapshot.forEach(function(childSnapshot) {
+                    var key = childSnapshot.key;
+                    var data = childSnapshot.val() || {};
+                    container.innerHTML += '<div class="item-box">' +
+                        '<h4>👤 المريض: ' + safeTxt(data.name ⠵⠵⠺⠺⠟⠞⠺⠟⠵⠞⠟⠺⠞⠟⠺⠞⠟⠵⠵⠵⠺⠺⠵⠟⠵⠟⠺⠞⠺⠞⠵⠟⠟⠟⠟⠟⠟⠞⠵⠺⠟⠺⠺⠺⠺ "0") + ')</h4>' +
+                        '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;">' + safeTxt(data.body) + '</pre>' +
+                        '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
+                        '</div>';
+                });
+            });
+
+            // 3. المقالات المنشورة a
+            db.ref('articles').on('value', function(snapshot) {
+                var container = document.getElementById('articles-list');
+                if (!container) return;
+                container.innerHTML = "";
+                if (!snapshot.exists()) { container.innerHTML = "لا توجد مقالات منشورة."; return; }
+                snapshot.forEach(function(childSnapshot) {
+                    var key = childSnapshot.key;
+                    var data = childSnapshot.val() || {};
+                    container.innerHTML += '<div class="item-box">' +
+                        '<h4>' + safeTxt(data.title || "بدون عنوان") + '</h4>' +
+                        '<p>' + safeTxt(data.body || "") + '</p>' +
+                        '<button class="btn-delete" onclick="deleteItem(\'articles\', \'' + key + '\')">حذف المقال 🗑️</button>' +
+                        '</div>';
+                });
+            });
+
+            // 4. الحالات المعروضة cases
+            db.ref('cases').on('value', function(snapshot) {
+                var container = document.getElementById('cases-list');if (!container) return;
+                container.innerHTML = "";
+                if (!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }
+                snapshot.forEach(function(childSnapshot) {
+                    var key = childSnapshot.key;
+                    container.innerHTML += '<div class="item-box">' +
+                        '<h4>' + safeTxt(childSnapshot.val().title || "بدون اسم") + '</h4>' +
+                        '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
+                        '</div>';
+                });
+            });
         }
 
-        // 1. جلب الحجوزات من العناوين الأصلية b
-        db.ref('bookings').on('value', function(snapshot) {var container = document.getElementById('bookings-list');
-            if (!container) return;
-            container.innerHTML = "";
-            if (!snapshot.exists()) { container.innerHTML = "لا توجد حجوزات حالياً."; return; }
-            snapshot.forEach(function(childSnapshot) {
-                var key = childSnapshot.key;
-                var data = childSnapshot.val() || {};
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>👤 المريض: ' + safeTxt(data.name || "بدون اسم") + '</h4>' +
-                    '<p>📞 الموبايل: <a href="tel:' + safeTxt(data.phone) + '">' + safeTxt(data.phone || "لا يوجد") + '</a></p>' +
-                    '<p>🦷 الخدمة: <span class="badge">' + safeTxt(data.service || "كشف") + '</span></p>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
-                    '</div>';
-            });
-        }, function(err) {
-            alert("عطل في السيرفر بقسم الحجوزات: " + err.message);
-        });
-
-        // 2. الروشتات والطباعة الاحترافية بالبيانات
+        // حفظ وطباعة الروشتة
         function saveAndPrintPrescription(e) {
             e.preventDefault();
             var name = document.getElementById('presc-name').value;
@@ -334,7 +391,8 @@
                         ".footer { text-align: center; margin-top: 40px; border-top: 2px solid #112d4e; padding-top: 10px; font-size: 13px; color: #777; font-weight: bold; }" +
                         "</style></head><body>" +
                         "<div class='header'><h2>عيادة PRO DENT لطب وجراحة الأسنان</h2><h3>الدكتور: إبراهيم عبدالمحسن فوزي</h3><p>العنوان: المحلة الكبرى | تليفون: 01020526886</p></div>" +
-                        "<table class='info-table'><tr><td><b>اسم المريض:</b> " + safeTxt(name) + "</td><td><b>السن:</b> " + safeTxt(age) + " سنة</td><td style='text-align:left;'><b>التاريخ:</b> " + safeTxt(dateStr) + "</td></tr></table>" +"<div class='rx-title'>Rx:</div><div class='rx-body'>" + safeTxt(body) + "</div>" +
+                        "<table class='info-table'><tr><td><b>اسم المريض:</b> " + safeTxt(name) + "</td><td><b>السن:</b> " + safeTxt(age) + " سنة</td><td style='text-align:left;'><b>التاريخ:</b> " + safeTxt(dateStr) + "</td></tr></table>" +
+                        "<div class='rx-title'>Rx:</div><div class='rx-body'>" + safeTxt(body) + "</div>" +
                         "<div class='footer'><p>تمنياتنا بالشفاء العاجل | يرجى الالتزام التام بالجرعات المحددة من قبل الطبيب.</p></div>" +
                         "</body></html>";
                     pWin.document.write(htmlContent);
@@ -342,48 +400,21 @@
                     pWin.print();
                 }
             });
+        }// إضافة مقال جديد
+        function addArticle(e) {
+            e.preventDefault();
+            var title = document.getElementById('art-title').value;
+            var body = document.getElementById('art-body').value;
+            db.ref('articles').push({ title: title, body: body }, function(err) {
+                if (!err) {
+                    alert("تم نشر المقال بنجاح!");
+                    document.getElementById('art-title').value = "";
+                    document.getElementById('art-body').value = "";
+                }
+            });
         }
 
-        db.ref('prescriptions').on('value', function(snapshot) {
-            var container = document.getElementById('prescriptions-list');
-            if (!container) return;
-            container.innerHTML = "";
-            if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ حالياً."; return; }
-            snapshot.forEach(function(childSnapshot) {
-                var key = childSnapshot.key;
-                var data = childSnapshot.val() || {};
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>👤 المريض: ' + safeTxt(data.name ⠺⠟⠟⠟⠟⠺⠟⠞⠵⠞⠞⠵⠞⠵⠵⠺⠟⠵⠟⠞⠵⠺⠺⠟⠵⠵⠵⠟⠺⠵⠞⠵⠟⠵⠟⠵⠵⠺⠞⠵⠺⠵⠞⠵⠞ "0") + ')</h4>' +
-                    '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;">' + safeTxt(data.body) + '</pre>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
-                    '</div>';
-            });
-        }, function(err) {
-            alert("عطل في السيرفر بقسم الروشتات: " + err.message);
-        });
-
-        // 3. جلب المقالات الاصلي a
-        db.ref('articles').on('value', function(snapshot) {
-            var container = document.getElementById('articles-list');
-            if (!container) return;
-            container.innerHTML = "";
-            if (!snapshot.exists()) { container.innerHTML = "لا توجد مقالات منشورة."; return; }
-            snapshot.forEach(function(childSnapshot) {
-                var key = childSnapshot.key;
-                var data = childSnapshot.val() || {};
-                var txt = data.body ? data.body.toString() : "";
-                var shortTxt = txt.length > 60 ? txt.substring(0, 60) + "..." : txt;
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>' + safeTxt(data.title || "بدون عنوان") + '</h4>' +
-                    '<p>' + safeTxt(shortTxt) + '</p>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'articles\', \'' + key + '\')">حذف المقال 🗑️</button>' +
-                    '</div>';
-            });
-        }, function(err) {
-            alert("عطل في السيرفر بقسم المقالات: " + err.message);
-        });
-
-        // دالة ضغط الصور الكلاسيكية المضمونة
+        // ضغط الصور الكلاسيكي
         function compressAndConvert(file, callback) {
             var reader = new FileReader();
             reader.readAsDataURL(file);
@@ -408,7 +439,9 @@
                     callback(dataUrl);
                 };
             };
-        }// 4. رفع الحالات الاصلي cases
+        }
+
+        // رفع حالة جديدة
         function addCase(e) {
             e.preventDefault();
             var btn = document.getElementById('submit-case-btn');
@@ -434,23 +467,6 @@
                 });
             });
         }
-
-        db.ref('cases').on('value', function(snapshot) {
-            var container = document.getElementById('cases-list');
-            if (!container) return;
-            container.innerHTML = "";
-            if (!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }
-            snapshot.forEach(function(childSnapshot) {
-                var key = childSnapshot.key;
-                var data = childSnapshot.val() || {};
-                container.innerHTML += '<div class="item-box">' +
-                    '<h4>' + safeTxt(data.title || "بدون اسم") + '</h4>' +
-                    '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
-                    '</div>';
-            });
-        }, function(err) {
-            alert("عطل في السيرفر بقسم الحالات: " + err.message);
-        });
     </script>
 </body>
 </html>
