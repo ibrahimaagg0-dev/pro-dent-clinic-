@@ -110,7 +110,7 @@
             font-weight: bold;
         }
         
-        /* شاشة تسجيل الدخول الفخمة والأنيقة */
+        /* شاشة تسجيل الدخول الكحلي الفخمة */
         #login-screen {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: linear-gradient(135deg, #112d4e 0%, #1a4473 100%);
@@ -121,10 +121,36 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 90%; max-width: 360px;
             text-align: center;
         }
-    </style>
+    </style><script>
+        function checkPassword() {
+            var input = document.getElementById('pass-input').value;
+            if (input === "123456") {
+                document.getElementById('login-screen').style.display = 'none';
+                // تشغيل جلب البيانات فوراً بعد نجاح الدخول لمنع أي قفلة صامتة
+                if (typeof startFirebaseLoad === 'function') { startFirebaseLoad(); }
+            } else {
+                alert("كلمة المرور خاطئة يا دكتور إبراهيم! حاول مجدداً.");
+            }
+        }
+
+        function show(id, el) {
+            var secs = ['b', 'p', 'a', 'cases'];
+            for (var i = 0; i < secs.length; i++) {
+                var section = document.getElementById(secs[i]);
+                if (section) { section.style.display = 'none'; }
+            }
+            var target = document.getElementById(id);
+            if (target) { target.style.display = 'block'; }
+
+            var tabs = document.querySelectorAll('.tab');
+            for (var j = 0; j < tabs.length; j++) { tabs[j].classList.remove('active'); }
+            if (el) { el.classList.add('active'); }
+        }
+    </script>
 </head>
 <body>
-<div id="login-screen">
+
+    <div id="login-screen">
         <div class="login-card">
             <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
             <h2 style="color: #112d4e; margin: 0 0 5px 0; font-size: 22px;">لوحة تحكم PRO DENT</h2>
@@ -167,8 +193,7 @@
                     <option value="Dalacin C 300mg cap.\nSig: 1 capsule every 8 hours.">Dalacin C 300mg (لحساسية البنسلين)</option>
                     <option value="Flagyl 500mg tab.\nSig: 1 tablet every 8 hours.">Flagyl 500mg (مضاد لالتهاب اللثة)</option>
                     <option value="Cataflam 50mg tab.\nSig: 1 tablet every 8 hours after meals.">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
-                    <option value="Brufen 600mg tab.\nSig: 1 tablet every 8 hours after meals.">Brufen 600mg (مسكن قوي)</option>
-                    <option value="Ketofan 50mg cap.\nSig: 1 capsule every 8 hours.">Ketofan 50mg (مسكن للآلام)</option>
+                    <option value="Brufen 600mg tab.\nSig: 1 tablet every 8 hours after meals.">Brufen 600mg (مسكن قوي)</option><option value="Ketofan 50mg cap.\nSig: 1 capsule every 8 hours.">Ketofan 50mg (مسكن للآلام)</option>
                     <option value="Panadol Advance 500mg tab.\nSig: 2 tablets when necessary.">Panadol Advance (مسكن آمن)</option>
                     <option value="Ambezim-G tab.\nSig: 1 tablet 3 times daily (1 hour before meals).">Ambezim-G (مضاد للتورم)</option>
                     <option value="Oraxine Mouthwash.\nSig: Rinse 3 times daily for 30 seconds.">Oraxine Mouthwash (مضمضة مطهرة)</option>
@@ -185,7 +210,8 @@
             <h3>سجل الروشتات المحفوظة</h3>
             <div id="prescriptions-list" class="item-list">في انتظار تسجيل الدخول...</div>
         </div>
-    </div>   
+    </div>
+
     <div id="a" class="sec">
         <div class="card">
             <h3>إضافة مقال جديد</h3>
@@ -218,33 +244,6 @@
             <div id="cases-list" class="item-list">في انتظار تسجيل الدخول...</div>
         </div>
     </div>
-
-    <script>
-        function checkPassword() {
-            var input = document.getElementById('pass-input').value;
-            if (input === "123456") {
-                document.getElementById('login-screen').style.display = 'none';
-                // تشغيل السيرفر بأمان تام بعد فتح الشاشة
-                if (typeof startFirebaseLoad === 'function') { startFirebaseLoad(); }
-            } else {
-                alert("كلمة المرور خاطئة يا دكتور إبراهيم! حاول مجدداً.");
-            }
-        }
-
-        function show(id, el) {
-            var secs = ['b', 'p', 'a', 'cases'];
-            for (var i = 0; i < secs.length; i++) {
-                var section = document.getElementById(secs[i]);
-                if (section) { section.style.display = 'none'; }
-            }
-            var target = document.getElementById(id);
-            if (target) { target.style.display = 'block'; }
-
-            var tabs = document.querySelectorAll('.tab');
-            for (var j = 0; j < tabs.length; j++) { tabs[j].classList.remove('active'); }
-            if (el) { el.classList.add('active'); }
-        }
-    </script>
 
     <script>
         function safeTxt(str) {
@@ -280,13 +279,14 @@
                 textarea.value += select.value + "\n\n";
                 select.value = "";
             }
-        }function startFirebaseLoad() {
+        }// دالة تحميل البيانات الكبرى (تشتغل غصب عن المتصفح فور الدخول)
+        function startFirebaseLoad() {
             document.getElementById('bookings-list').innerHTML = "جاري تحميل الحجوزات...";
-            document.getElementById('prescriptions-list').innerHTML = "جاري تحميل السجل...";
+            document.getElementById('prescriptions-list').innerHTML = "جاري تحميل سجل الروشتات...";
             document.getElementById('articles-list').innerHTML = "جاري تحميل المقالات...";
-            document.getElementById('cases-list').innerHTML = "جاري تحميل الحالات...";
+            document.getElementById('cases-list').innerHTML = "جاري تحميل الحالات... ";
 
-            // 1. الحجوزات
+            // 1. الحجوزات b
             db.ref('bookings').on('value', function(snapshot) {
                 var container = document.getElementById('bookings-list');
                 if (!container) return; container.innerHTML = "";
@@ -303,7 +303,7 @@
                 });
             });
 
-            // 2. الروشتات
+            // 2. الروشتات p
             db.ref('prescriptions').on('value', function(snapshot) {
                 var container = document.getElementById('prescriptions-list');
                 if (!container) return; container.innerHTML = "";
@@ -312,14 +312,14 @@
                     var key = childSnapshot.key;
                     var data = childSnapshot.val() || {};
                     container.innerHTML += '<div class="item-box">' +
-                        '<h4>👤 المريض: ' + safeTxt(data.name ⠺⠵⠵⠟⠞⠵⠞⠟⠵⠟⠵⠵⠟⠟⠟⠺⠞⠟⠟⠺⠺⠟⠟⠞⠞⠵⠺⠞⠺⠺⠟⠟⠞⠵⠞⠞⠺⠟⠺⠺⠟⠵⠺⠵⠞ "0") + ')</h4>' +
+                        '<h4>👤 المريض: ' + safeTxt(data.name ⠺⠞⠵⠞⠞⠺⠵⠺⠞⠵⠺⠞⠟⠟⠞⠵⠺⠵⠺⠞⠟⠵⠵⠵⠟⠞⠟⠺⠞⠟⠺⠵⠟⠞⠺⠟⠵⠞⠟⠞⠵⠵⠵⠟⠺ "0") + ')</h4>' +
                         '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;">' + safeTxt(data.body) + '</pre>' +
                         '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
                         '</div>';
                 });
             });
 
-            // 3. المقالات
+            // 3. المقالات a
             db.ref('articles').on('value', function(snapshot) {
                 var container = document.getElementById('articles-list');
                 if (!container) return; container.innerHTML = "";
@@ -335,11 +335,11 @@
                 });
             });
 
-            // 4. الحالات
+            // 4. الحالات cases
             db.ref('cases').on('value', function(snapshot) {
                 var container = document.getElementById('cases-list');
-                if (!container) return; container.innerHTML = "";
-                if (!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }snapshot.forEach(function(childSnapshot) {
+                if (!container) return; container.innerHTML = "";if (!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }
+                snapshot.forEach(function(childSnapshot) {
                     var key = childSnapshot.key;
                     var data = childSnapshot.val() || {};
                     container.innerHTML += '<div class="item-box">' +
@@ -367,7 +367,7 @@
                     document.getElementById('presc-body').value = "";
                     
                     var pWin = window.open('', '_blank');
-                    if (!pWin) { alert("تم الحفظ بنجاح، ولكن المتصفح منع فتح شاشة الطباعة."); return; }
+                    if (!pWin) { alert("تم حفظ الروشتة بنجاح، ولكن المتصفح منع فتح شاشة الطباعة."); return; }
                     var htmlContent = "<html><head><title>روشتة عيادة PRO DENT</title>" +
                         "<style>body{font-family:Arial,sans-serif;direction:rtl;padding:40px;background:#fff;}" +
                         ".header{text-align:center;border-bottom:3px double #112d4e;padding-bottom:15px;margin-bottom:30px;}" +
@@ -389,17 +389,20 @@
             });
         }
 
+        // المقالات
         function addArticle(e) {
             e.preventDefault();
-            var title = document.getElementById('art-title').value;
-            var body = document.getElementById('art-body').value;
+            var title = document.getElementById('art-title').value;var body = document.getElementById('art-body').value;
             db.ref('articles').push({ title: title, body: body }, function(err) {
                 if (!err) {
                     alert("تم نشر المقال بنجاح!");
                     document.getElementById('art-title').value = ""; document.getElementById('art-body').value = "";
                 }
             });
-        }function compressAndConvert(file, callback) {
+        }
+
+        // ضغط الصور الحالات
+        function compressAndConvert(file, callback) {
             var reader = new FileReader(); reader.readAsDataURL(file);
             reader.onload = function (event) {
                 var img = new Image(); img.src = event.target.result;
