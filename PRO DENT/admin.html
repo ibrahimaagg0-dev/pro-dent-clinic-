@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -113,11 +114,14 @@
     </style>
 
     <script>
-        var pass = prompt("🔐 بوابه الأمان لعيادة PRO DENT\n\nأدخل كلمة المرور للدخول يا دكتور إبراهيم:");
+        var pass = prompt("🔐 بوابة الأمان لعيادة PRO DENT\n\nأدخل كلمة المرور للدخول يا دكتور إبراهيم:");
         if (pass !== "123456") {
             alert("كلمة المرور خاطئة!");
             window.location.href = "https://ibrahimaagg0-dev.github.io/pro-dent-clinic-/";
-        }function show(id, el) {
+        }
+
+
+function show(id, el) {
             var secs = ['tab-bookings', 'tab-prescriptions', 'tab-articles', 'tab-cases'];
             for (var i = 0; i < secs.length; i++) { 
                 var section = document.getElementById(secs[i]);
@@ -187,7 +191,9 @@
             <h3>سجل الروشتات المحفوظة</h3>
             <div id="prescriptions-list" class="item-list">جاري تحميل السجل...</div>
         </div>
-    </div><div id="tab-articles" class="sec">
+    </div>
+
+<div id="tab-articles" class="sec">
         <div class="card">
             <h3>إضافة مقال جديد</h3>
             <form onsubmit="addArticle(event)">
@@ -231,6 +237,7 @@
                 .replace(/'/g, "&#039;");
         }
 
+        // إعدادات الـ Firebase الخاصة بك
         var firebaseConfig = {
             apiKey: "AIzaSyCMRigEePTR9zhk13Dh-CTx282vId_q2N4",
             databaseURL: "https://pro-dent-3c752-default-rtdb.firebaseio.com",
@@ -238,6 +245,13 @@
         };
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
+
+        // 🚨 منبه الاتصال الذكي: لو الرابط غلط أو النت فاصل هيطلع تنبيه فوراً يوضح المشكلة
+        db.ref('.info/connected').on('value', function(snapshot) {
+            if (snapshot.val() !== true) {
+                alert("🚨 تنبيه هام جداً:\nلوحة التحكم غير قادرة على الاتصال بسيرفر الفايربيز حالياً!\n\nيرجى التأكد من أن رابط الـ databaseURL الموجود في الكود مطابق بالملي للرابط المكتوب عندك في صفحة الفايربيز.");
+            }
+        });
 
         function deleteItem(nodeName, key) {
             if (confirm("هل أنت متأكد من رغبتك في حذف هذا العنصر نهائياً؟")) {
@@ -256,7 +270,7 @@
             }
         }
 
-        // 1. جلب الحجوزات مع كاشف الخطأ السيرفر
+        // 1. جلب الحجوزات بأضمن طريقة كلاسيكية للسيرفر
         db.ref('bookings').on('value', function(snapshot) {
             var container = document.getElementById('bookings-list');
             if (!container) return;
@@ -265,16 +279,17 @@
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
-                container.innerHTML += "<div class='item-box'>" +
-                    "<h4>👤 المريض: " + safeTxt(data.name || "بدون اسم") + "</h4>" +
-                    "<p>📞 الموبايل: <a href='tel:" + safeTxt(data.phone) + "'>" + safeTxt(data.phone || "لا يوجد") + "</a></p>" +
-                    "<p>🦷 الخدمة: <span class='badge'>" + safeTxt(data.service || "كشف") + "</span></p>" +
-                    "<button class='btn-delete' onclick='deleteItem(\"bookings\", \"" + key + "\")'>مسح الحجز 🗑️</button>" +
-                    "</div>";
+                container.innerHTML += '<div class="item-box">' +
+
+'<h4>👤 المريض: ' + safeTxt(data.name || "بدون اسم") + '</h4>' +
+                    '<p>📞 الموبايل: <a href="tel:' + safeTxt(data.phone) + '">' + safeTxt(data.phone || "لا يوجد") + '</a></p>' +
+                    '<p>🦷 الخدمة: <span class="badge">' + safeTxt(data.service || "كشف") + '</span></p>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
+                    '</div>';
             });
-        }, function(error) {
-            alert("⚠️ السيرفر رفض تحميل الحجوزات بسبب: " + error.message);
-        });// 2. الروشتات والطباعة
+        });
+
+        // 2. الروشتات والطباعة
         function saveAndPrintPrescription(e) {
             e.preventDefault();
             var name = document.getElementById('presc-name').value;
@@ -292,7 +307,7 @@
                     
                     var pWin = window.open('', '_blank');
                     if (!pWin) {
-                        alert("تم الحفظ بنجاح، ولكن المتصفح منع الطباعة.");
+                        alert("تم حفظ الروشتة بنجاح، ولكن المتصفح منع الطباعة التلقائية.");
                         return;
                     }
                     var htmlContent = "<html><head><title>روشتة عيادة PRO DENT</title>" +
@@ -323,19 +338,20 @@
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
-                container.innerHTML += "<div class='item-box'>" +
-                    "<h4>👤 المريض: " + safeTxt(data.name ⠵⠵⠵⠞⠟⠞⠟⠺⠟⠵⠟⠺⠺⠞⠞⠞⠺⠵⠺⠵⠞⠞⠟⠞⠺⠺⠟⠵⠵⠟⠺⠺⠞⠺⠺⠞⠵⠞⠞⠺⠞⠵⠺⠞⠞ "0") + ")</h4>" +
-                    "<pre style='direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;'>" + safeTxt(data.body) + "</pre>" +
-                    "<button class='btn-delete' onclick='deleteItem(\"prescriptions\", \"" + key + "\")'>حذف الروشتة 🗑️</button>" +
-                    "</div>";
+                container.innerHTML += '<div class="item-box">' +
+                    '<h4>👤 المريض: ' + safeTxt(data.name ⠟⠵⠺⠟⠺⠟⠺⠺⠟⠵⠺⠺⠵⠵⠵⠵⠺⠞⠺⠵⠵⠵⠺⠟⠵⠵⠵⠞⠟⠵⠟⠵⠟⠵⠟⠞⠞⠵⠞⠺⠵⠵⠟⠞⠟ "0") + ')</h4>' +
+                    '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;">' + safeTxt(data.body) + '</pre>' +
+
+> 
+'<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
+                    '</div>';
             });
-        }, function(error) {
-            alert("⚠️ السيرفر رفض تحميل الروشتات بسبب: " + error.message);
         });
 
         // 3. المقالات
         function addArticle(e) {
-            e.preventDefault();var title = document.getElementById('art-title').value;
+            e.preventDefault();
+            var title = document.getElementById('art-title').value;
             var body = document.getElementById('art-body').value;
             db.ref('articles').push({ title: title, body: body }, function(err) {
                 if (!err) {
@@ -356,14 +372,12 @@
                 var data = childSnapshot.val() || {};
                 var txt = data.body ? data.body.toString() : "";
                 var shortTxt = txt.length > 60 ? txt.substring(0, 60) + "..." : txt;
-                container.innerHTML += "<div class='item-box'>" +
-                    "<h4>" + safeTxt(data.title || "بدون عنوان") + "</h4>" +
-                    "<p>" + safeTxt(shortTxt) + "</p>" +
-                    "<button class='btn-delete' onclick='deleteItem(\"articles\", \"" + key + "\")'>حذف المقال 🗑️</button>" +
-                    "</div>";
+                container.innerHTML += '<div class="item-box">' +
+                    '<h4>' + safeTxt(data.title || "بدون عنوان") + '</h4>' +
+                    '<p>' + safeTxt(shortTxt) + '</p>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'articles\', \'' + key + '\')">حذف المقال 🗑️</button>' +
+                    '</div>';
             });
-        }, function(error) {
-            alert("⚠️ السيرفر رفض تحميل المقالات بسبب: " + error.message);
         });
 
         // دالة ضغط الصور
@@ -418,7 +432,10 @@
                     });
                 });
             });
-        }db.ref('cases').on('value', function(snapshot) {
+        }
+
+> 
+db.ref('cases').on('value', function(snapshot) {
             var container = document.getElementById('cases-list');
             if (!container) return;
             container.innerHTML = "";
@@ -426,13 +443,11 @@
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
-                container.innerHTML += "<div class='item-box'>" +
-                    "<h4>" + safeTxt(data.title || "بدون اسم") + "</h4>" +
-                    "<button class='btn-delete' onclick='deleteItem(\"cases\", \"" + key + "\")'>حذف الحالة 🗑️</button>" +
-                    "</div>";
+                container.innerHTML += '<div class="item-box">' +
+                    '<h4>' + safeTxt(data.title || "بدون اسم") + '</h4>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
+                    '</div>';
             });
-        }, function(error) {
-            alert("⚠️ السيرفر رفض تحميل الحالات بسبب: " + error.message);
         });
     </script>
 </body>
