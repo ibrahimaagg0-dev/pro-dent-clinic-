@@ -110,30 +110,14 @@
             font-size: 12px;
             font-weight: bold;
         }
-        
-        /* شاشة تسجيل الدخول الفخمة والأمنة */
-        #login-screen {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: linear-gradient(135deg, #112d4e 0%, #1a4473 100%);z-index: 99999; display: flex; justify-content: center; align-items: center;
-        }
-        .login-card {
-            background: #fff; padding: 35px 25px; border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 90%; max-width: 360px;
-            text-align: center;
-        }
     </style>
 
     <script>
-        function checkPassword() {
-            var input = document.getElementById('pass-input').value;
-            if (input === "123456") {
-                document.getElementById('login-screen').style.display = 'none';
-            } else {
-                alert("كلمة المرور خاطئة يا دكتور! حاول مجدداً.");
-            }
-        }
-
-        function show(id, el) {
+        var pass = prompt("🔐 بوابه الأمان لعيادة PRO DENT\n\nأدخل كلمة المرور للدخول يا دكتور إبراهيم:");
+        if (pass !== "123456") {
+            alert("كلمة المرور خاطئة!");
+            window.location.href = "https://ibrahimaagg0-dev.github.io/pro-dent-clinic-/";
+        }function show(id, el) {
             var secs = ['tab-bookings', 'tab-prescriptions', 'tab-articles', 'tab-cases'];
             for (var i = 0; i < secs.length; i++) { 
                 var section = document.getElementById(secs[i]);
@@ -151,16 +135,6 @@
     </script>
 </head>
 <body>
-
-    <div id="login-screen">
-        <div class="login-card">
-            <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
-            <h2 style="color: #112d4e; margin: 0 0 5px 0; font-size: 22px;">لوحة تحكم PRO DENT</h2>
-            <p style="font-size:13px; color:#666; margin-bottom:25px;">مرحباً دكتور إبراهيم، يرجى كتابة الباسورد</p>
-            <input type="password" id="pass-input" placeholder="أدخل كلمة المرور هنا..." style="text-align: center; font-size: 16px; letter-spacing: 4px;" onkeypress="if(event.keyCode === 13) checkPassword()">
-            <button onclick="checkPassword()" style="background: #112d4e; font-size: 15px;">دخول لوحة التحكم 🔑</button>
-        </div>
-    </div>
 
     <header>
         <h1>⚙️ لوحة تحكم العيادة</h1>
@@ -180,7 +154,7 @@
         </div>
     </div>
 
-    <div id="tab-prescriptions" class="sec" style="display:none;">
+    <div id="tab-prescriptions" class="sec">
         <div class="card">
             <h3>كتابة روشتة جديدة 🖨️</h3>
             <form onsubmit="saveAndPrintPrescription(event)">
@@ -193,9 +167,10 @@
                     <option value="Augmentin 1g tab. (1 tablet every 12 hours)">Augmentin 1g (مضاد حيوي قوي)</option>
                     <option value="Amoxicillin 500mg cap. (1 capsule every 8 hours)">Amoxicillin 500mg (مضاد حيوي)</option>
                     <option value="Dalacin C 300mg cap. (1 capsule every 8 hours)">Dalacin C 300mg (مضاد حيوي للحساسية)</option>
-                    <option value="Flagyl 500mg tab. (1 tablet every 8 hours)">Flagyl 500mg (مضاد لاتهاب اللثة)</option><option value="Cataflam 50mg tab. (1 tablet every 8 hours after meals)">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
+                    <option value="Flagyl 500mg tab. (1 tablet every 8 hours)">Flagyl 500mg (مضاد لاتهاب اللثة)</option>
+                    <option value="Cataflam 50mg tab. (1 tablet every 8 hours after meals)">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
                     <option value="Brufen 600mg tab. (1 tablet every 8 hours after meals)">Brufen 600mg (مسكن قوي)</option>
-                    <option value="Ketofan 50mg cap. (1 capsule every 8 hours)">Ketofan 50mg (مسكن آام فوري)</option>
+                    <option value="Ketofan 50mg cap. (1 capsule every 8 hours)">Ketofan 50mg (مسكن آلام فوري)</option>
                     <option value="Panadol Advance 500mg tab. (2 tablets when necessary)">Panadol Advance (مسكن آمن)</option>
                     <option value="Ambezim-G tab. (1 tablet 3 times daily - 1 hour before meals)">Ambezim-G (مضاد للتورم)</option>
                     <option value="Oraxine Mouthwash (Rinse 3 times daily for 30 seconds)">Oraxine Mouthwash (مضمضة مطهرة)</option>
@@ -212,9 +187,7 @@
             <h3>سجل الروشتات المحفوظة</h3>
             <div id="prescriptions-list" class="item-list">جاري تحميل السجل...</div>
         </div>
-    </div>
-
-    <div id="tab-articles" class="sec" style="display:none;">
+    </div><div id="tab-articles" class="sec">
         <div class="card">
             <h3>إضافة مقال جديد</h3>
             <form onsubmit="addArticle(event)">
@@ -229,7 +202,7 @@
         </div>
     </div>
 
-    <div id="tab-cases" class="sec" style="display:none;">
+    <div id="tab-cases" class="sec">
         <div class="card">
             <h3>إضافة حالة جديدة (من الاستوديو علطول)</h3>
             <form id="case-form" onsubmit="addCase(event)">
@@ -272,7 +245,9 @@
                     if (!error) alert("تم الحذف بنجاح!");
                 });
             }
-        }function addMedToText() {
+        }
+
+        function addMedToText() {
             var select = document.getElementById('med-select');
             var textarea = document.getElementById('presc-body');
             if (select.value !== "") {
@@ -281,7 +256,7 @@
             }
         }
 
-        // 1. جلب الحجوزات المصلح
+        // 1. جلب الحجوزات مع كاشف الخطأ السيرفر
         db.ref('bookings').on('value', function(snapshot) {
             var container = document.getElementById('bookings-list');
             if (!container) return;
@@ -294,12 +269,12 @@
                     "<h4>👤 المريض: " + safeTxt(data.name || "بدون اسم") + "</h4>" +
                     "<p>📞 الموبايل: <a href='tel:" + safeTxt(data.phone) + "'>" + safeTxt(data.phone || "لا يوجد") + "</a></p>" +
                     "<p>🦷 الخدمة: <span class='badge'>" + safeTxt(data.service || "كشف") + "</span></p>" +
-                    "<button class='btn-delete' onclick=\"deleteItem('bookings', '" + key + "')\">مسح الحجز 🗑️</button>" +
+                    "<button class='btn-delete' onclick='deleteItem(\"bookings\", \"" + key + "\")'>مسح الحجز 🗑️</button>" +
                     "</div>";
             });
-        });
-
-        // 2. الروشتات والطباعة المصلح
+        }, function(error) {
+            alert("⚠️ السيرفر رفض تحميل الحجوزات بسبب: " + error.message);
+        });// 2. الروشتات والطباعة
         function saveAndPrintPrescription(e) {
             e.preventDefault();
             var name = document.getElementById('presc-name').value;
@@ -317,7 +292,7 @@
                     
                     var pWin = window.open('', '_blank');
                     if (!pWin) {
-                        alert("تم حفظ الروشتة بنجاح، ولكن المتصفح منع الطباعة التلقائية.");
+                        alert("تم الحفظ بنجاح، ولكن المتصفح منع الطباعة.");
                         return;
                     }
                     var htmlContent = "<html><head><title>روشتة عيادة PRO DENT</title>" +
@@ -338,7 +313,9 @@
                     pWin.print();
                 }
             });
-        }db.ref('prescriptions').on('value', function(snapshot) {
+        }
+
+        db.ref('prescriptions').on('value', function(snapshot) {
             var container = document.getElementById('prescriptions-list');
             if (!container) return;
             container.innerHTML = "";
@@ -347,17 +324,18 @@
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
                 container.innerHTML += "<div class='item-box'>" +
-                    "<h4>👤 المريض: " + safeTxt(data.name ⠟⠞⠟⠟⠺⠞⠞⠵⠞⠟⠺⠞⠟⠵⠺⠞⠺⠺⠟⠟⠟⠟⠞⠺⠺⠺⠟⠟⠺⠞⠟⠺⠞⠟⠞⠞⠞⠞⠞⠟⠞⠵⠺⠵⠞ "0") + ")</h4>" +
+                    "<h4>👤 المريض: " + safeTxt(data.name ⠵⠵⠵⠞⠟⠞⠟⠺⠟⠵⠟⠺⠺⠞⠞⠞⠺⠵⠺⠵⠞⠞⠟⠞⠺⠺⠟⠵⠵⠟⠺⠺⠞⠺⠺⠞⠵⠞⠞⠺⠞⠵⠺⠞⠞ "0") + ")</h4>" +
                     "<pre style='direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;'>" + safeTxt(data.body) + "</pre>" +
-                    "<button class='btn-delete' onclick=\"deleteItem('prescriptions', '" + key + "')\">حذف الروشتة 🗑️</button>" +
+                    "<button class='btn-delete' onclick='deleteItem(\"prescriptions\", \"" + key + "\")'>حذف الروشتة 🗑️</button>" +
                     "</div>";
             });
+        }, function(error) {
+            alert("⚠️ السيرفر رفض تحميل الروشتات بسبب: " + error.message);
         });
 
-        // 3. المقالات المصلح
+        // 3. المقالات
         function addArticle(e) {
-            e.preventDefault();
-            var title = document.getElementById('art-title').value;
+            e.preventDefault();var title = document.getElementById('art-title').value;
             var body = document.getElementById('art-body').value;
             db.ref('articles').push({ title: title, body: body }, function(err) {
                 if (!err) {
@@ -381,9 +359,11 @@
                 container.innerHTML += "<div class='item-box'>" +
                     "<h4>" + safeTxt(data.title || "بدون عنوان") + "</h4>" +
                     "<p>" + safeTxt(shortTxt) + "</p>" +
-                    "<button class='btn-delete' onclick=\"deleteItem('articles', '" + key + "')\">حذف المقال 🗑️</button>" +
+                    "<button class='btn-delete' onclick='deleteItem(\"articles\", \"" + key + "\")'>حذف المقال 🗑️</button>" +
                     "</div>";
             });
+        }, function(error) {
+            alert("⚠️ السيرفر رفض تحميل المقالات بسبب: " + error.message);
         });
 
         // دالة ضغط الصور
@@ -413,8 +393,9 @@
             };
         }
 
-        // 4. الحالات المصلح
-        function addCase(e) {e.preventDefault();
+        // 4. الحالات
+        function addCase(e) {
+            e.preventDefault();
             var btn = document.getElementById('submit-case-btn');
             var title = document.getElementById('case-title').value;
             var beforeFile = document.getElementById('case-before').files[0];
@@ -437,9 +418,7 @@
                     });
                 });
             });
-        }
-
-        db.ref('cases').on('value', function(snapshot) {
+        }db.ref('cases').on('value', function(snapshot) {
             var container = document.getElementById('cases-list');
             if (!container) return;
             container.innerHTML = "";
@@ -449,9 +428,11 @@
                 var data = childSnapshot.val() || {};
                 container.innerHTML += "<div class='item-box'>" +
                     "<h4>" + safeTxt(data.title || "بدون اسم") + "</h4>" +
-                    "<button class='btn-delete' onclick=\"deleteItem('cases', '" + key + "')\">حذف الحالة 🗑️</button>" +
+                    "<button class='btn-delete' onclick='deleteItem(\"cases\", \"" + key + "\")'>حذف الحالة 🗑️</button>" +
                     "</div>";
             });
+        }, function(error) {
+            alert("⚠️ السيرفر رفض تحميل الحالات بسبب: " + error.message);
         });
     </script>
 </body>
