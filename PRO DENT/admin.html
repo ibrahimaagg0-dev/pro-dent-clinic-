@@ -123,7 +123,8 @@
         }
     </style>
 </head>
-<body><div id="login-screen">
+<body>
+<div id="login-screen">
         <div class="login-card">
             <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
             <h2 style="color: #112d4e; margin: 0 0 5px 0; font-size: 22px;">لوحة تحكم PRO DENT</h2>
@@ -155,7 +156,7 @@
         <div class="card">
             <h3>كتابة روشتة جديدة 🖨️</h3>
             <form onsubmit="saveAndPrintPrescription(event)">
-                <input type="text" id="presc-name" placeholder="اسم Mريض" required>
+                <input type="text" id="presc-name" placeholder="اسم المريض" required>
                 <input type="number" id="presc-age" placeholder="السن" required>
                 
                 <label>💊 أدوية أسنان شائعة بالإنجليزية (اختر للإضافة التلقائية):</label>
@@ -184,7 +185,8 @@
             <h3>سجل الروشتات المحفوظة</h3>
             <div id="prescriptions-list" class="item-list">في انتظار تسجيل الدخول...</div>
         </div>
-    </div><div id="a" class="sec">
+    </div>   
+    <div id="a" class="sec">
         <div class="card">
             <h3>إضافة مقال جديد</h3>
             <form onsubmit="addArticle(event)">
@@ -218,19 +220,17 @@
     </div>
 
     <script>
-        // دالة التحقق من الباسورد
         function checkPassword() {
             var input = document.getElementById('pass-input').value;
             if (input === "123456") {
                 document.getElementById('login-screen').style.display = 'none';
-                // تشغيل السيرفر وجلب الداتا فوراً بعد نجاح الدخول لمنع أي قفلة صامتة
-                startFirebaseLoad(); 
+                // تشغيل السيرفر بأمان تام بعد فتح الشاشة
+                if (typeof startFirebaseLoad === 'function') { startFirebaseLoad(); }
             } else {
                 alert("كلمة المرور خاطئة يا دكتور إبراهيم! حاول مجدداً.");
             }
         }
 
-        // دالة التنقل الكلاسيكية بين التابات الاصيلة
         function show(id, el) {
             var secs = ['b', 'p', 'a', 'cases'];
             for (var i = 0; i < secs.length; i++) {
@@ -241,13 +241,12 @@
             if (target) { target.style.display = 'block'; }
 
             var tabs = document.querySelectorAll('.tab');
-            for (var j = 0; j < tabs.length; j++) {
-                tabs[j].classList.remove('active');
-            }
+            for (var j = 0; j < tabs.length; j++) { tabs[j].classList.remove('active'); }
             if (el) { el.classList.add('active'); }
         }
+    </script>
 
-        // دالة تطهير وتأمين التكست
+    <script>
         function safeTxt(str) {
             if (!str) return "";
             return str.toString()
@@ -258,7 +257,6 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // إعدادات الـ Firebase الخاصة بـ PRO DENT
         var firebaseConfig = {
             apiKey: "AIzaSyCMRigEePTR9zhk13Dh-CTx282vId_q2N4",
             databaseURL: "https://pro-dent-3c752-default-rtdb.firebaseio.com",
@@ -282,18 +280,16 @@
                 textarea.value += select.value + "\n\n";
                 select.value = "";
             }
-        }// دالة تشغيل الاتصال وجلب البيانات (لا تبدأ إلا بعد كتابة الباسورد بنجاح)
-        function startFirebaseLoad() {
+        }function startFirebaseLoad() {
             document.getElementById('bookings-list').innerHTML = "جاري تحميل الحجوزات...";
-            document.getElementById('prescriptions-list').innerHTML = "جاري تحميل سجل الروشتات...";
+            document.getElementById('prescriptions-list').innerHTML = "جاري تحميل السجل...";
             document.getElementById('articles-list').innerHTML = "جاري تحميل المقالات...";
             document.getElementById('cases-list').innerHTML = "جاري تحميل الحالات...";
 
-            // 1. جلب الحجوزات b
+            // 1. الحجوزات
             db.ref('bookings').on('value', function(snapshot) {
                 var container = document.getElementById('bookings-list');
-                if (!container) return;
-                container.innerHTML = "";
+                if (!container) return; container.innerHTML = "";
                 if (!snapshot.exists()) { container.innerHTML = "لا توجد حجوزات حالياً."; return; }
                 snapshot.forEach(function(childSnapshot) {
                     var key = childSnapshot.key;
@@ -307,28 +303,26 @@
                 });
             });
 
-            // 2. سجل الروشتات p
+            // 2. الروشتات
             db.ref('prescriptions').on('value', function(snapshot) {
                 var container = document.getElementById('prescriptions-list');
-                if (!container) return;
-                container.innerHTML = "";
+                if (!container) return; container.innerHTML = "";
                 if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ حالياً."; return; }
                 snapshot.forEach(function(childSnapshot) {
                     var key = childSnapshot.key;
                     var data = childSnapshot.val() || {};
                     container.innerHTML += '<div class="item-box">' +
-                        '<h4>👤 المريض: ' + safeTxt(data.name ⠺⠺⠺⠵⠟⠺⠟⠟⠞⠞⠞⠟⠞⠟⠞⠞⠵⠺⠟⠟⠞⠺⠵⠺⠺⠵⠺⠺⠟⠵⠵⠺⠺⠟⠺⠵⠞⠺⠟⠟⠟⠞⠵⠞⠞ "0") + ')</h4>' +
+                        '<h4>👤 المريض: ' + safeTxt(data.name ⠺⠵⠵⠟⠞⠵⠞⠟⠵⠟⠵⠵⠟⠟⠟⠺⠞⠟⠟⠺⠺⠟⠟⠞⠞⠵⠺⠞⠺⠺⠟⠟⠞⠵⠞⠞⠺⠟⠺⠺⠟⠵⠺⠵⠞ "0") + ')</h4>' +
                         '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;">' + safeTxt(data.body) + '</pre>' +
                         '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
                         '</div>';
                 });
             });
 
-            // 3. المقالات المنشورة a
+            // 3. المقالات
             db.ref('articles').on('value', function(snapshot) {
                 var container = document.getElementById('articles-list');
-                if (!container) return;
-                container.innerHTML = "";
+                if (!container) return; container.innerHTML = "";
                 if (!snapshot.exists()) { container.innerHTML = "لا توجد مقالات منشورة."; return; }
                 snapshot.forEach(function(childSnapshot) {
                     var key = childSnapshot.key;
@@ -341,15 +335,15 @@
                 });
             });
 
-            // 4. الحالات المعروضة cases
+            // 4. الحالات
             db.ref('cases').on('value', function(snapshot) {
-                var container = document.getElementById('cases-list');if (!container) return;
-                container.innerHTML = "";
-                if (!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }
-                snapshot.forEach(function(childSnapshot) {
+                var container = document.getElementById('cases-list');
+                if (!container) return; container.innerHTML = "";
+                if (!snapshot.exists()) { container.innerHTML = "لا توجد حالات معروضة حالياً."; return; }snapshot.forEach(function(childSnapshot) {
                     var key = childSnapshot.key;
+                    var data = childSnapshot.val() || {};
                     container.innerHTML += '<div class="item-box">' +
-                        '<h4>' + safeTxt(childSnapshot.val().title || "بدون اسم") + '</h4>' +
+                        '<h4>' + safeTxt(data.title || "بدون اسم") + '</h4>' +
                         '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
                         '</div>';
                 });
@@ -373,33 +367,28 @@
                     document.getElementById('presc-body').value = "";
                     
                     var pWin = window.open('', '_blank');
-                    if (!pWin) {
-                        alert("تم حفظ الروشتة بنجاح، ولكن المتصفح منع فتح شاشة الطباعة.");
-                        return;
-                    }
+                    if (!pWin) { alert("تم الحفظ بنجاح، ولكن المتصفح منع فتح شاشة الطباعة."); return; }
                     var htmlContent = "<html><head><title>روشتة عيادة PRO DENT</title>" +
-                        "<style>" +
-                        "body { font-family: Arial, sans-serif; direction: rtl; padding: 40px; background: #fff; }" +
-                        ".header { text-align: center; border-bottom: 3px double #112d4e; padding-bottom: 15px; margin-bottom: 30px; }" +
-                        ".header h2 { margin: 0 0 5px 0; color: #112d4e; font-size: 26px; }" +
-                        ".header h3 { margin: 5px 0; color: #3f72af; font-size: 20px; }" +
-                        ".header p { margin: 5px 0; font-size: 14px; color: #555; font-weight: bold; }" +
-                        ".info-table { width: 100%; font-size: 16px; margin-bottom: 40px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }" +
-                        ".rx-title { font-size: 28px; font-weight: bold; color: #112d4e; text-align: left; margin-bottom: 15px; font-style: italic; }" +
-                        ".rx-body { direction: ltr; text-align: left; font-size: 19px; line-height: 1.8; min-height: 280px; white-space: pre-wrap; font-weight: bold; padding-left: 15px; }" +
-                        ".footer { text-align: center; margin-top: 40px; border-top: 2px solid #112d4e; padding-top: 10px; font-size: 13px; color: #777; font-weight: bold; }" +
+                        "<style>body{font-family:Arial,sans-serif;direction:rtl;padding:40px;background:#fff;}" +
+                        ".header{text-align:center;border-bottom:3px double #112d4e;padding-bottom:15px;margin-bottom:30px;}" +
+                        ".header h2{margin:0 0 5px 0;color:#112d4e;font-size:26px;}" +
+                        ".header h3{margin:5px 0;color:#3f72af;font-size:20px;}" +
+                        ".header p{margin:5px 0;font-size:14px;color:#555;font-weight:bold;}" +
+                        ".info-table{width:100%;font-size:16px;margin-bottom:40px;border-bottom:1px solid #ccc;padding-bottom:10px;}" +
+                        ".rx-title{font-size:28px;font-weight:bold;color:#112d4e;text-align:left;margin-bottom:15px;font-style:italic;}" +
+                        ".rx-body{direction:ltr;text-align:left;font-size:19px;line-height:1.8;min-height:280px;white-space:pre-wrap;font-weight:bold;padding-left:15px;}" +
+                        ".footer{text-align:center;margin-top:40px;border-top:2px solid #112d4e;padding-top:10px;font-size:13px;color:#777;font-weight:bold;}" +
                         "</style></head><body>" +
                         "<div class='header'><h2>عيادة PRO DENT لطب وجراحة الأسنان</h2><h3>الدكتور: إبراهيم عبدالمحسن فوزي</h3><p>العنوان: المحلة الكبرى | تليفون: 01020526886</p></div>" +
                         "<table class='info-table'><tr><td><b>اسم المريض:</b> " + safeTxt(name) + "</td><td><b>السن:</b> " + safeTxt(age) + " سنة</td><td style='text-align:left;'><b>التاريخ:</b> " + safeTxt(dateStr) + "</td></tr></table>" +
                         "<div class='rx-title'>Rx:</div><div class='rx-body'>" + safeTxt(body) + "</div>" +
                         "<div class='footer'><p>تمنياتنا بالشفاء العاجل | يرجى الالتزام التام بالجرعات المحددة من قبل الطبيب.</p></div>" +
                         "</body></html>";
-                    pWin.document.write(htmlContent);
-                    pWin.document.close();
-                    pWin.print();
+                    pWin.document.write(htmlContent); pWin.document.close(); pWin.print();
                 }
             });
-        }// إضافة مقال جديد
+        }
+
         function addArticle(e) {
             e.preventDefault();
             var title = document.getElementById('art-title').value;
@@ -407,61 +396,37 @@
             db.ref('articles').push({ title: title, body: body }, function(err) {
                 if (!err) {
                     alert("تم نشر المقال بنجاح!");
-                    document.getElementById('art-title').value = "";
-                    document.getElementById('art-body').value = "";
+                    document.getElementById('art-title').value = ""; document.getElementById('art-body').value = "";
                 }
             });
-        }
-
-        // ضغط الصور الكلاسيكي المضمون
-        function compressAndConvert(file, callback) {
-            var reader = new FileReader();
-            reader.readAsDataURL(file);
+        }function compressAndConvert(file, callback) {
+            var reader = new FileReader(); reader.readAsDataURL(file);
             reader.onload = function (event) {
-                var img = new Image();
-                img.src = event.target.result;
+                var img = new Image(); img.src = event.target.result;
                 img.onload = function () {
-                    var canvas = document.createElement('canvas');
-                    var max_size = 500;
-                    var width = img.width;
-                    var height = img.height;
-                    if (width > height) {
-                        if (width > max_size) { height *= max_size / width; width = max_size; }
-                    } else {
-                        if (height > max_size) { width *= max_size / height; height = max_size; }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    var ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                    callback(dataUrl);
+                    var canvas = document.createElement('canvas'); var max_size = 500;
+                    var width = img.width; var height = img.height;
+                    if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } }
+                    else { if (height > max_size) { width *= max_size / height; height = max_size; } }
+                    canvas.width = width; canvas.height = height;
+                    var ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                    var dataUrl = canvas.toDataURL('image/jpeg', 0.6); callback(dataUrl);
                 };
             };
         }
 
-        // رفع حالة جديدة
         function addCase(e) {
             e.preventDefault();
             var btn = document.getElementById('submit-case-btn');
             var title = document.getElementById('case-title').value;
             var beforeFile = document.getElementById('case-before').files[0];
             var afterFile = document.getElementById('case-after').files[0];
-
-            btn.disabled = true;
-            btn.innerText = "جاري معالجة الصور... انتظر ثواني ⏳";
-
+            btn.disabled = true; btn.innerText = "جاري معالجة الصور... انتظر ثواني ⏳";
             compressAndConvert(beforeFile, function(beforeBase64) {
                 compressAndConvert(afterFile, function(afterBase64) {
-                    db.ref('cases').push({
-                        title: title, before: beforeBase64, after: afterBase64
-                    }, function(err) {
-                        btn.disabled = false;
-                        btn.innerText = "نشر الحالة في العيادة 📸";
-                        if (!err) {
-                            alert("تم رفع صور الحالة ونشرها بنجاح! 🎉");
-                            document.getElementById('case-form').reset();
-                        }
+                    db.ref('cases').push({ title: title, before: beforeBase64, after: afterBase64 }, function(err) {
+                        btn.disabled = false; btn.innerText = "نشر الحالة في العيادة 📸";
+                        if (!err) { alert("تم رفع صور الحالة ونشرها بنجاح! 🎉"); document.getElementById('case-form').reset(); }
                     });
                 });
             });
