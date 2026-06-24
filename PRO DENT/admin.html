@@ -110,7 +110,7 @@
             font-weight: bold;
         }
         
-        /* شاشة تسجيل الدخول الفخمة والأنيقة */
+        /* شاشة تسجيل الدخول الفخمة والأنيقة المحدثة */
         #login-screen {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: linear-gradient(135deg, #112d4e 0%, #1a4473 100%);
@@ -121,16 +121,42 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 90%; max-width: 360px;
             text-align: center;
         }
-    </style>
+    </style><script>
+        function checkPassword() {
+            var input = document.getElementById('pass-input').value;
+            if (input === "123456") {
+                document.getElementById('login-screen').style.display = 'none';
+            } else {
+                alert("كلمة المرور خاطئة يا دكتور إبراهيم! حاول مجدداً.");
+            }
+        }
+
+        function show(id, el) {
+            var secs = ['b', 'p', 'a', 'cases'];
+            for (var i = 0; i < secs.length; i++) {
+                var section = document.getElementById(secs[i]);
+                if (section) { section.style.display = 'none'; }
+            }
+            var target = document.getElementById(id);
+            if (target) { target.style.display = 'block'; }
+
+            var tabs = document.querySelectorAll('.tab');
+            for (var j = 0; j < tabs.length; j++) {
+                tabs[j].classList.remove('active');
+            }
+            if (el) { el.classList.add('active'); }
+        }
+    </script>
 </head>
 <body>
-  <div id="login-screen">
+
+    <div id="login-screen">
         <div class="login-card">
             <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
             <h2 style="color: #112d4e; margin: 0 0 5px 0; font-size: 22px;">لوحة تحكم PRO DENT</h2>
             <p style="font-size:13px; color:#666; margin-bottom:25px;">مرحباً دكتور إبراهيم، يرجى كتابة الباسورد</p>
-            <input type="password" id="pass-input" placeholder="أدخل كلمة المرور هنا..." style="text-align: center; font-size: 16px; letter-spacing: 4px;">
-            <button id="login-submit-btn" style="background: #112d4e; font-size: 15px;">دخول لوحة التحكم 🔑</button>
+            <input type="password" id="pass-input" placeholder="أدخل كلمة المرور هنا..." style="text-align: center; font-size: 16px; letter-spacing: 4px;" onkeypress="if(event.keyCode === 13) checkPassword()">
+            <button onclick="checkPassword()" style="background: #112d4e; font-size: 15px;">دخول لوحة التحكم 🔑</button>
         </div>
     </div>
 
@@ -169,8 +195,7 @@
                     <option value="Cataflam 50mg tab.\nSig: 1 tablet every 8 hours after meals.">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
                     <option value="Brufen 600mg tab.\nSig: 1 tablet every 8 hours after meals.">Brufen 600mg (مسكن قوي)</option>
                     <option value="Ketofan 50mg cap.\nSig: 1 capsule every 8 hours.">Ketofan 50mg (مسكن للآلام)</option>
-                    <option value="Panadol Advance 500mg tab.\nSig: 2 tablets when necessary.">Panadol Advance (مسكن آمن)</option>
-                    <option value="Ambezim-G tab.\nSig: 1 tablet 3 times daily (1 hour before meals).">Ambezim-G (مضاد للتورم)</option>
+                    <option value="Panadol Advance 500mg tab.\nSig: 2 tablets when necessary.">Panadol Advance (مسكن آمن)</option><option value="Ambezim-G tab.\nSig: 1 tablet 3 times daily (1 hour before meals).">Ambezim-G (مضاد للتورم)</option>
                     <option value="Oraxine Mouthwash.\nSig: Rinse 3 times daily for 30 seconds.">Oraxine Mouthwash (مضمضة مطهرة)</option>
                     <option value="Daktarin Oral Gel.\nSig: Apply to oral cavity 4 times daily.">Daktarin Oral Gel (جل للفطريات)</option>
                 </select>
@@ -185,7 +210,9 @@
             <h3>سجل الروشتات المحفوظة</h3>
             <div id="prescriptions-list" class="item-list">جاري تحميل السجل...</div>
         </div>
-    </div>  <div id="a" class="sec">
+    </div>
+
+    <div id="a" class="sec">
         <div class="card">
             <h3>إضافة مقال جديد</h3>
             <form onsubmit="addArticle(event)">
@@ -219,24 +246,6 @@
     </div>
 
     <script>
-        // دالة التنقل الكلاسيكية الأصلية السليمة بين التابات
-        function show(id, el) {
-            var secs = ['b', 'p', 'a', 'cases'];
-            for (var i = 0; i < secs.length; i++) {
-                var section = document.getElementById(secs[i]);
-                if (section) { section.style.display = 'none'; }
-            }
-            var target = document.getElementById(id);
-            if (target) { target.style.display = 'block'; }
-
-            var tabs = document.querySelectorAll('.tab');
-            for (var j = 0; j < tabs.length; j++) {
-                tabs[j].classList.remove('active');
-            }
-            if (el) { el.classList.add('active'); }
-        }
-
-        // دالة تنظيف وتأمين النصوص لمنع الرموز الغريبة من تجميد المتصفح
         function safeTxt(str) {
             if (!str) return "";
             return str.toString()
@@ -247,7 +256,6 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // إعدادات الـ Firebase الخاصة بـ PRO DENT
         var firebaseConfig = {
             apiKey: "AIzaSyCMRigEePTR9zhk13Dh-CTx282vId_q2N4",
             databaseURL: "https://pro-dent-3c752-default-rtdb.firebaseio.com",
@@ -256,7 +264,6 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
 
-        // دالة الحذف العامة النظيفة
         function deleteItem(nodeName, key) {
             if (confirm("هل أنت متأكد من رغبتك في حذف هذا العنصر نهائياً؟")) {
                 db.ref(nodeName).child(key).remove(function(error) {
@@ -275,9 +282,9 @@
         }
 
         // 1. جلب الحجوزات من العناوين الأصلية b
-        db.ref('bookings').on('value', function(snapshot) {
-            var container = document.getElementById('bookings-list');
-            if (!container) return;container.innerHTML = "";
+        db.ref('bookings').on('value', function(snapshot) {var container = document.getElementById('bookings-list');
+            if (!container) return;
+            container.innerHTML = "";
             if (!snapshot.exists()) { container.innerHTML = "لا توجد حجوزات حالياً."; return; }
             snapshot.forEach(function(childSnapshot) {
                 var key = childSnapshot.key;
@@ -286,7 +293,7 @@
                     '<h4>👤 المريض: ' + safeTxt(data.name || "بدون اسم") + '</h4>' +
                     '<p>📞 الموبايل: <a href="tel:' + safeTxt(data.phone) + '">' + safeTxt(data.phone || "لا يوجد") + '</a></p>' +
                     '<p>🦷 الخدمة: <span class="badge">' + safeTxt(data.service || "كشف") + '</span></p>' +
-                    '<button class="btn-delete" data-node="bookings" data-key="' + key + '">مسح الحجز 🗑️</button>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
                     '</div>';
             });
         });
@@ -325,8 +332,8 @@
                         ".footer { text-align: center; margin-top: 40px; border-top: 2px solid #112d4e; padding-top: 10px; font-size: 13px; color: #777; font-weight: bold; }" +
                         "</style></head><body>" +
                         "<div class='header'><h2>عيادة PRO DENT لطب وجراحة الأسنان</h2><h3>الدكتور: إبراهيم عبدالمحسن فوزي</h3><p>العنوان: المحلة الكبرى | تليفون: 01020526886</p></div>" +
-                        "<table class='info-table'><tr><td><b>اسم المريض:</b> " + safeTxt(name) + "</td><td><b>السن:</b> " + safeTxt(age) + " سنة</td><td style='text-align:left;'><b>التاريخ:</b> " + safeTxt(dateStr) + "</td></tr></table>" +
-                        "<div class='rx-title'>Rx:</div><div class='rx-body'>" + safeTxt(body) + "</div>" +"<div class='footer'><p>تمنياتنا بالشفاء العاجل | يرجى الالتزام التام بالجرعات المحددة من قبل الطبيب.</p></div>" +
+                        "<table class='info-table'><tr><td><b>اسم المريض:</b> " + safeTxt(name) + "</td><td><b>السن:</b> " + safeTxt(age) + " سنة</td><td style='text-align:left;'><b>التاريخ:</b> " + safeTxt(dateStr) + "</td></tr></table>" +"<div class='rx-title'>Rx:</div><div class='rx-body'>" + safeTxt(body) + "</div>" +
+                        "<div class='footer'><p>تمنياتنا بالشفاء العاجل | يرجى الالتزام التام بالجرعات المحددة من قبل الطبيب.</p></div>" +
                         "</body></html>";
                     pWin.document.write(htmlContent);
                     pWin.document.close();
@@ -344,27 +351,14 @@
                 var key = childSnapshot.key;
                 var data = childSnapshot.val() || {};
                 container.innerHTML += '<div class="item-box">' +
-                    '<h4>👤 المريض: ' + safeTxt(data.name ⠵⠵⠟⠟⠺⠟⠟⠞⠟⠞⠵⠵⠺⠵⠞⠵⠵⠵⠺⠟⠺⠺⠟⠵⠵⠟⠞⠟⠵⠟⠞⠞⠟⠞⠵⠞⠺⠟⠞⠵⠺⠵⠞⠟⠟ "0") + ')</h4>' +
+                    '<h4>👤 المريض: ' + safeTxt(data.name ⠺⠺⠞⠵⠞⠵⠵⠞⠵⠞⠞⠟⠵⠵⠺⠵⠵⠵⠞⠟⠵⠞⠟⠟⠞⠺⠵⠵⠺⠞⠵⠞⠞⠺⠞⠵⠟⠺⠟⠞⠟⠟⠵⠵⠞ "0") + ')</h4>' +
                     '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;">' + safeTxt(data.body) + '</pre>' +
-                    '<button class="btn-delete" data-node="prescriptions" data-key="' + key + '">حذف الروشتة 🗑️</button>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
                     '</div>';
             });
         });
 
         // 3. جلب المقالات الاصلي a
-        function addArticle(e) {
-            e.preventDefault();
-            var title = document.getElementById('art-title').value;
-            var body = document.getElementById('art-body').value;
-            db.ref('articles').push({ title: title, body: body }, function(err) {
-                if (!err) {
-                    alert("تم نشر المقال بنجاح!");
-                    document.getElementById('art-title').value = "";
-                    document.getElementById('art-body').value = "";
-                }
-            });
-        }
-
         db.ref('articles').on('value', function(snapshot) {
             var container = document.getElementById('articles-list');
             if (!container) return;
@@ -378,7 +372,7 @@
                 container.innerHTML += '<div class="item-box">' +
                     '<h4>' + safeTxt(data.title || "بدون عنوان") + '</h4>' +
                     '<p>' + safeTxt(shortTxt) + '</p>' +
-                    '<button class="btn-delete" data-node="articles" data-key="' + key + '">حذف المقال 🗑️</button>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'articles\', \'' + key + '\')">حذف المقال 🗑️</button>' +
                     '</div>';
             });
         });
@@ -400,7 +394,8 @@
                     } else {
                         if (height > max_size) { width *= max_size / height; height = max_size; }
                     }
-                    canvas.width = width;canvas.height = height;
+                    canvas.width = width;
+                    canvas.height = height;
                     var ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
@@ -411,8 +406,7 @@
 
         // 4. رفع الحالات الاصلي cases
         function addCase(e) {
-            e.preventDefault();
-            var btn = document.getElementById('submit-case-btn');
+            e.preventDefault();var btn = document.getElementById('submit-case-btn');
             var title = document.getElementById('case-title').value;
             var beforeFile = document.getElementById('case-before').files[0];
             var afterFile = document.getElementById('case-after').files[0];
@@ -446,37 +440,8 @@
                 var data = childSnapshot.val() || {};
                 container.innerHTML += '<div class="item-box">' +
                     '<h4>' + safeTxt(data.title || "بدون اسم") + '</h4>' +
-                    '<button class="btn-delete" data-node="cases" data-key="' + key + '">حذف الحالة 🗑️</button>' +
+                    '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة 🗑️</button>' +
                     '</div>';
-            });
-        });
-
-        // 🛠️ التغيير الجذري: متحكم مركزي معزول تماماً عن كتل النصوص لإدارة الأزرار والدخول ومستحيل يعلق
-        function checkPassword() {
-            var input = document.getElementById('pass-input').value;
-            if (input === "123456") {
-                document.getElementById('login-screen').style.display = 'none';
-            } else {
-                alert("كلمة المرور خاطئة يا دكتور إبراهيم! حاول مجدداً.");
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', function() {
-            // تشغيل زرار تسجيل الدخول
-            document.getElementById('login-submit-btn').addEventListener('click', checkPassword);
-            document.getElementById('pass-input').addEventListener('keypress', function(e) {
-                if (e.keyCode === 13) checkPassword();
-            });
-
-            // التقاط نقرات أزرار الحذف مركزياً وبشكل معزول لمنع قفلات الكوتس
-            document.addEventListener('click', function(event) {
-                if (event.target && event.target.classList.contains('btn-delete')) {
-                    var nodeName = event.target.getAttribute('data-node');
-                    var key = event.target.getAttribute('data-key');
-                    if (nodeName && key) {
-                        deleteItem(nodeName, key);
-                    }
-                }
             });
         });
     </script>
