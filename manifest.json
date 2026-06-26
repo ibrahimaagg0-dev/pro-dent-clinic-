@@ -1,0 +1,16 @@
+﻿{
+  "name": "PRO DENT Control Panel",
+  "short_name": "PRO DENT",
+  "start_url": "admin.html",
+  "display": "standalone",
+  "background_color": "#f4f7f6",
+  "theme-color": "#112d4e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://www.gstatic.com/images/branding/product/2x/avatar_anonymous_64dp.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
+}
