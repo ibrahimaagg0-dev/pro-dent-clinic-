@@ -41,7 +41,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        /* حاوية اللوحة الرئيسية - مخفية تماماً في البداية */
+        /* حاوية اللوحة الرئيسية */
         #main-app {
             display: none;
         }
@@ -140,9 +140,11 @@
         .btn-delete {
             background: #d9534f; color: white; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; margin-top: 10px; width: auto; display: inline-block;
         }
-        /* زرار الواتساب الاحترافي */
         .btn-whatsapp {
             background: #25d366; color: white; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; margin-top: 10px; width: auto; display: inline-block; margin-left: 8px; font-weight: bold;
+        }
+        .btn-test-sound {
+            background: #f39c12; color: white; padding: 5px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; width: auto; display: inline-block; margin-bottom: 10px;
         }
         
         .badge { background: #e1e8ed; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
@@ -156,16 +158,32 @@
 
     <script>
         var db = null;
-        var lastBookingCount = -1; // لمراقبة أعداد الحجوزات الجديدة
+        var lastBookingCount = -1;
+        var audioCtx = null; // نظام الصوت العام
 
         function safeTxt(str) {
             if (!str) return "";
             return str.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
+        // إنشاء نظام الصوت وتفعيله فور ضغط المبرمج أو الدكتور على زرار الدخول
+        function initAudio() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch (e) {
+                console.log("Audio Init Failed: ", e);
+            }
+        }
+
         function checkPassword() {
             var input = document.getElementById('pass-input').value;
             if (input === "123456") {
+                initAudio(); // 🔊 تفعيل وفك حظر الصوت فوراً بالاعتماد على هذه الضغطة
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 startFirebaseLoad(); 
@@ -183,55 +201,47 @@
             if (el) { el.classList.add('active'); }
         }
 
-        // دالة توليد صوت التنبيه برمجياً بدون الحاجة لملفات خارجية
+        // دالة توليد نغمة التنبيه الاحترافية المحدثة
         function playNotificationSound() {
+            initAudio(); // التأكد من تفعيل قنوات الصوت
             try {
-                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // النغمة الأولى
-                var osc1 = audioCtx.createOscillator();
-                var gain1 = audioCtx.createGain();
-                osc1.connect(gain1); gain1.connect(audioCtx.destination);
-                osc1.type = 'sine'; osc1.frequency.value = 523.25; // نغمة C5
-                gain1.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                osc1.start(); osc1.stop(audioCtx.currentTime + 0.15);
-                
-                // النغمة الثانية المبهجة بعدها مباشرة
-                setTimeout(function() {
-                    var osc2 = audioCtx.createOscillator();
-                    var gain2 = audioCtx.createGain();
-                    osc2.connect(gain2); gain2.connect(audioCtx.destination);
-                    osc2.type = 'sine'; osc2.frequency.value = 659.25; // نغمة E5
-                    gain2.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    osc2.start(); osc2.stop(audioCtx.currentTime + 0.25);
-                }, 150);
+                if (audioCtx) {
+                    // النغمة الأولى
+                    var osc1 = audioCtx.createOscillator();
+                    var gain1 = audioCtx.createGain();
+                    osc1.connect(gain1); gain1.connect(audioCtx.destination);
+                    osc1.type = 'sine'; osc1.frequency.value = 587.33; // نغمة D5 مبهجة
+                    gain1.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc1.start(); osc1.stop(audioCtx.currentTime + 0.15);
+                    
+                    // النغمة الثانية الأعلى بعدها مباشرة لتعطي انطباع الإشعار المألوف
+                    setTimeout(function() {
+                        var osc2 = audioCtx.createOscillator();
+                        var gain2 = audioCtx.createGain();
+                        osc2.connect(gain2); gain2.connect(audioCtx.destination);
+                        osc2.type = 'sine'; osc2.frequency.value = 880.00; // نغمة A5 حادة واضحة
+                        gain2.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                        gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                        osc2.start(); osc2.stop(audioCtx.currentTime + 0.3);
+                    }, 120);
+                }
             } catch (e) {
-                console.log("Audio contexts pending or blocked by browser policy.");
+                console.log("Audio player encountered an issue: ", e);
             }
         }
 
-        // دالة إرسال رسالة الواتساب وتجهيز الرقم المصري تلقائياً
         function sendWhatsAppConfirmation(phone, name) {
-            if (!phone) {
-                alert("المريض لم يسجل رقم هاتف!");
-                return;
-            }
-            
-            // تنظيف رقم الهاتف وصياغته بكود مصر الدولي (20)
+            if (!phone) { alert("المريض لم يسجل رقم هاتف!"); return; }
             var cleanPhone = phone.toString().trim();
-            if (cleanPhone.startsWith('0')) {
-                cleanPhone = '2' + cleanPhone; // يحول 010... إلى 2010...
-            } else if (!cleanPhone.startsWith('2')) {
-                cleanPhone = '20' + cleanPhone; // يضمن وجود كود الدولة
-            }
+            if (cleanPhone.startsWith('0')) { cleanPhone = '2' + cleanPhone; }
+            else if (!cleanPhone.startsWith('2')) { cleanPhone = '20' + cleanPhone; }
             
-            // صياغة رسالة عيادة PRO DENT الاحترافية
             var msg = "السلام عليكم ورحمة الله وبركاته يا فندم، مَع حضرتك عيادة PRO DENT لطب وجراحة الأسنان ✨\n\n";
             msg += "بنبلغ أ/ " + name + " إنه تم استلام وتسجيل بيانات حجزكم بنجاح في منظومة العيادة أونلاين. \n\n";
             msg += "دكتور إبراهيم هيتواصل مع حضرتك قريباً جداً لتنسيق وتأكيد ساعة الحجز بالتفصيل.\n\n";
             msg += "شرفتنا ونتمنى لك دوام الصحة والعافية 🦷";
             
-            // فتح رابط واتساب ويب أو التطبيق المباشر
             var waUrl = "https://api.whatsapp.com/send?phone=" + cleanPhone + "&text=" + encodeURIComponent(msg);
             window.open(waUrl, '_blank');
         }
@@ -239,7 +249,6 @@
 </head>
 <body>
 
-    <!-- الشاشة المنفصلة التامة للباسورد -->
     <div id="login-screen">
         <div class="login-card">
             <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
@@ -250,7 +259,6 @@
         </div>
     </div>
 
-    <!-- كبسولة اللوحة الرئيسية -->
     <div id="main-app">
         
         <div id="connection-status">🟡 جاري فحص كود الجافا سكريبت والاتصال...</div>
@@ -270,6 +278,8 @@
         <div id="b" class="sec active">
             <div class="card">
                 <h3>قائمة الحجوزات الحالية</h3>
+                <!-- زرار فحص وتجربة نغمة التنبيه -->
+                <button class="btn-test-sound" onclick="playNotificationSound()">تجربة صوت التنبيه 🔊</button>
                 <div id="bookings-list" class="item-list">جاري التحميل...</div>
             </div>
         </div>
@@ -282,7 +292,7 @@
                     <input type="text" id="presc-name" placeholder="اسم المريض" required>
                     <input type="number" id="presc-age" placeholder="السن" required>
                     
-                    <label>💊 أدوية أسنان شائعة (اختر للإضافة التلقائية):</label>
+                    <label>💊 أدوية أسنان شائعة:</label>
                     <select id="med-select" onchange="addMedToText()">
                         <option value="">-- اختر دواء لإضافته للروشتة --</option>
                         <option value="Augmentin 1g tab. (1 tablet every 12 hours)">Augmentin 1g (مضاد حيوي قوي)</option>
@@ -300,7 +310,6 @@
 
                     <label>📝 نص الروشتة (Rx):</label>
                     <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea>
-                    
                     <button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
                 </form>
             </div>
@@ -316,7 +325,7 @@
                 <h3>إضافة مقال جديد للعيادة</h3>
                 <form onsubmit="addArticle(event)">
                     <input type="text" id="art-title" placeholder="عنوان المقال" required>
-                    <textarea id="art-body" rows="5" placeholder="اكتب نص المقال الطبي بالتفصيل هنا..." required></textarea>
+                    <textarea id="art-body" rows="5" placeholder="اكتب نص المقال بالتفصيل هنا..." required></textarea>
                     <button type="submit">نشر المقال على الموقع ✨</button>
                 </form>
             </div>
@@ -348,7 +357,6 @@
     </div>
 
     <script>
-        // اتصال فايربيز الآمن
         try {
             var firebaseConfig = {
                 apiKey: "AIzaSyCMRigEePTR9zhk13Dh-CTx282vId_q2N4",
@@ -388,18 +396,18 @@
             document.getElementById('articles-list').innerHTML = "⏳ جاري جلب المقالات...";
             document.getElementById('cases-list').innerHTML = "⏳ جاري جلب الحالات...";
 
-            // 1. مزامنة ورصد الحجوزات + ميزة التنبيه الصوتي الحية
+            // 1. مزامنة ورصد الحجوزات مع رصد الحجوزات الجديدة
             db.ref('bookings').on('value', function(snapshot) {
                 var container = document.getElementById('bookings-list');
                 container.innerHTML = "";
                 
                 var currentCount = snapshot.numChildren();
                 
-                // إذا زاد عدد الأطفال عن العدد السابق، فهناك حجز جديد سُجل حالاً!
+                // التنبيه يشتغل فقط لو زاد عدد الحجوزات أونلاين والصفحة مفتوحة قدامك
                 if (lastBookingCount !== -1 && currentCount > lastBookingCount) {
                     playNotificationSound();
                 }
-                lastBookingCount = currentCount; // تحديث العداد
+                lastBookingCount = currentCount; 
                 
                 if (!snapshot.exists()) { container.innerHTML = "لا توجد حجوزات حية حالياً."; return; }
                 
@@ -412,14 +420,13 @@
                         '<h4>👤 المريض: ' + nameEscaped + '</h4>' +
                         '<p>📞 الموبايل: <a href="tel:' + phoneEscaped + '">' + (phoneEscaped || "لا يوجد") + '</a></p>' +
                         '<p>🦷 الخدمة: <span class="badge">' + safeTxt(data.service || "كشف") + '</span></p>' +
-                        // زرار الواتساب وزرار المسح
                         '<button class="btn-whatsapp" onclick="sendWhatsAppConfirmation(\'' + phoneEscaped + '\', \'' + nameEscaped + '\')">إرسال تأكيد واتساب 💬</button>' +
                         '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
                         '</div>';
                 });
             }, function(err){ showReadError('bookings-list', err); });
 
-            // 2. مزامنة الروشتات
+            // 2. الروشتات
             db.ref('prescriptions').on('value', function(snapshot) {
                 var container = document.getElementById('prescriptions-list');
                 container.innerHTML = "";
@@ -434,7 +441,7 @@
                 });
             }, function(err){ showReadError('prescriptions-list', err); });
 
-            // 3. مزامنة المقالات
+            // 3. المقالات
             db.ref('articles').on('value', function(snapshot) {
                 var container = document.getElementById('articles-list');
                 container.innerHTML = "";
@@ -449,7 +456,7 @@
                 });
             }, function(err){ showReadError('articles-list', err); });
 
-            // 4. مزامنة الحالات
+            // 4. الحالات
             db.ref('cases').on('value', function(snapshot) {
                 var container = document.getElementById('cases-list');
                 container.innerHTML = "";
