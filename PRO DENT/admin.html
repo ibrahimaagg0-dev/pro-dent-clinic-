@@ -2,9 +2,10 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="utf-8">
-    <title>لوحة التحكم V4 - PRO DENT</title>
+    <title>لوحة التحكم - PRO DENT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <!-- ملفات فايربيز الأساسية -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -16,6 +17,35 @@
             padding: 0;
             color: #333;
         }
+        
+        /* شاشة تسجيل الدخول - صفحة منفصلة تماماً */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #112d4e 0%, #1a4473 100%);
+            z-index: 999999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-card {
+            background: #fff;
+            padding: 35px 25px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* حاوية اللوحة الرئيسية - مخفية تماماً في البداية */
+        #main-app {
+            display: none;
+        }
+
         header {
             background: #112d4e;
             color: #fff;
@@ -81,6 +111,7 @@
             box-sizing: border-box;
             background-color: #f9fbfd;
             font-family: inherit;
+            font-size: 15px;
         }
         input[type="file"] { background: #fff; padding: 10px; }
         label { font-weight: bold; font-size: 14px; color: #555; display: block; margin-bottom: 5px; }
@@ -91,8 +122,8 @@
             color: white;
             border: none;
             border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
+            font-weight: bold;cursor: pointer;
+            font-size: 15px;
         }
         .item-list { margin-top: 15px; }
         .item-box {
@@ -108,14 +139,8 @@
             background: #d9534f; color: white; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; margin-top: 10px; width: auto; display: inline-block;
         }
         .badge { background: #e1e8ed; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .error-msg { color: #d9534f; background: #fdf2f2; padding: 10px; border-radius: 8px; border: 1px solid #f5baba; font-size: 14px; #login-screen {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: linear-gradient(135deg, #112d4e 0%, #1a4473 100%);
-            z-index: 999999; display: flex; justify-content: center; align-items: center;
-        }
-        .login-card {
-            background: #fff; padding: 35px 25px; border-radius: 16px; width: 90%; max-width: 360px; text-align: center;
-        }
+        .error-msg { color: #d9534f; background: #fdf2f2; padding: 10px; border-radius: 8px; border: 1px solid #f5baba; font-size: 14px; }
+        
         .case-img-container { display: flex; gap: 10px; margin-top: 10px; }
         .case-img-box { flex: 1; text-align: center; }
         .case-img-box img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
@@ -133,7 +158,9 @@
         function checkPassword() {
             var input = document.getElementById('pass-input').value;
             if (input === "123456") {
+                // إخفاء صفحة الباسورد تماماً وإظهار اللوحة الرئيسية
                 document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
                 startFirebaseLoad(); 
             } else {
                 alert("كلمة المرور خاطئة يا دكتور إبراهيم!");
@@ -152,6 +179,7 @@
 </head>
 <body>
 
+    <!-- الشاشة المنفصلة التامة للباسورد -->
     <div id="login-screen">
         <div class="login-card">
             <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
@@ -162,91 +190,98 @@
         </div>
     </div>
 
-    <div id="connection-status">🟡 جاري فحص كود الجافا سكريبت والاتصال...</div>
+    <!-- كبسولة اللوحة الرئيسية (لن تظهر نهائياً إلا بعد تخطي الأمان) -->
+    <div id="main-app">
+        
+        <div id="connection-status">🟡 جاري فحص كود الجافا سكريبت والاتصال...</div>
 
-    <header>
-        <h1>⚙️ لوحة تحكم العيادة - إصدار V4 الكامل</h1>
-    </header>
+        <header>
+            <h1>⚙️ لوحة تحكم العيادة</h1>
+        </header>
 
-    <div class="nav">
-        <div class="tab active" onclick="show('b',this)">الحجوزات</div>
-        <div class="tab" onclick="show('p',this)">الروشتات 📝</div>
-        <div class="tab" onclick="show('a',this)">المقالات</div>
-        <div class="tab" onclick="show('cases',this)">الحالات</div>
-    </div>
+        <div class="nav">
+            <div class="tab active" onclick="show('b',this)">الحجوزات</div>
+            <div class="tab" onclick="show('p',this)">الروشتات 📝</div>
+            <div class="tab" onclick="show('a',this)">المقالات</div>
+            <div class="tab" onclick="show('cases',this)">الحالات</div>
+        </div>
 
-    <div id="b" class="sec active">
-        <div class="card">
-            <h3>قائمة الحجوزات الحالية</h3>
-            <div id="bookings-list" class="item-list">في انتظار تسجيل الدخول...</div>
-        </div>
-    </div>
+        <!-- 1. الحجوزات -->
+        <div id="b" class="sec active">
+            <div class="card">
+                <h3>قائمة الحجوزات الحالية</h3>
+                <div id="bookings-list" class="item-list">جاري التحميل...</div>
+            </div>
+        </div><!-- 2. الروشتات -->
+        <div id="p" class="sec">
+            <div class="card">
+                <h3>كتابة روشتة جديدة 🖨️</h3>
+                <form onsubmit="saveAndPrintPrescription(event)">
+                    <input type="text" id="presc-name" placeholder="اسم المريض" required>
+                    <input type="number" id="presc-age" placeholder="السن" required>
+                    
+                    <label>💊 أدوية أسنان شائعة (اختر للإضافة التلقائية):</label>
+                    <select id="med-select" onchange="addMedToText()">
+                        <option value="">-- اختر دواء لإضافته للروشتة --</option>
+                        <option value="Augmentin 1g tab. (1 tablet every 12 hours)">Augmentin 1g (مضاد حيوي قوي)</option>
+                        <option value="Amoxicillin 500mg cap. (1 capsule every 8 hours)">Amoxicillin 500mg (مضاد حيوي)</option>
+                        <option value="Dalacin C 300mg cap. (1 capsule every 8 hours)">Dalacin C 300mg (لحساسية البنسلين)</option>
+                        <option value="Flagyl 500mg tab. (1 tablet every 8 hours)">Flagyl 500mg (مضاد لالتهاب اللثة)</option>
+                        <option value="Cataflam 50mg tab. (1 tablet every 8 hours after meals)">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
+                        <option value="Brufen 600mg tab. (1 tablet every 8 hours after meals)">Brufen 600mg (مسكن قوي)</option>
+                        <option value="Ketofan 50mg cap. (1 capsule every 8 hours)">Ketofan 50mg (مسكن سريع للآلام)</option>
+                        <option value="Panadol Advance 500mg tab. (2 tablets when necessary)">Panadol Advance (مسكن آمن)</option>
+                        <option value="Ambezim-G tab. (1 tablet 3 times daily - 1 hour before meals)">Ambezim-G (مضاد للتورم والرشح)</option>
+                        <option value="Oraxine Mouthwash (Rinse 3 times daily for 30 seconds)">Oraxine Mouthwash (مضمضة مطهرة)</option>
+                        <option value="Daktarin Oral Gel (Apply to oral cavity 4 times daily)">Daktarin Oral Gel (جل للفطريات)</option>
+                    </select>
 
-    <div id="p" class="sec">
-        <div class="card">
-            <h3>كتابة روشتة جديدة 🖨️</h3>
-            <form onsubmit="saveAndPrintPrescription(event)">
-                <input type="text" id="presc-name" placeholder="اسم المريض" required>
-                <input type="number" id="presc-age" placeholder="السن" required>
-                
-                <label>💊 أدوية أسنان شائعة (اختر للإضافة التلقائية):</label>
-                <select id="med-select" onchange="addMedToText()">
-                    <option value="">-- اختر دواء لإضافته للروشتة --</option>
-                    <option value="Augmentin 1g tab. (1 tablet every 12 hours)">Augmentin 1g (مضاد حيوي قوي)</option><option value="Amoxicillin 500mg cap. (1 capsule every 8 hours)">Amoxicillin 500mg (مضاد حيوي)</option>
-                    <option value="Dalacin C 300mg cap. (1 capsule every 8 hours)">Dalacin C 300mg (لحساسية البنسلين)</option>
-                    <option value="Flagyl 500mg tab. (1 tablet every 8 hours)">Flagyl 500mg (مضاد لالتهاب اللثة)</option>
-                    <option value="Cataflam 50mg tab. (1 tablet every 8 hours after meals)">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
-                    <option value="Brufen 600mg tab. (1 tablet every 8 hours after meals)">Brufen 600mg (مسكن قوي)</option>
-                    <option value="Ketofan 50mg cap. (1 capsule every 8 hours)">Ketofan 50mg (مسكن سريع للآلام)</option>
-                    <option value="Panadol Advance 500mg tab. (2 tablets when necessary)">Panadol Advance (مسكن آمن)</option>
-                    <option value="Ambezim-G tab. (1 tablet 3 times daily - 1 hour before meals)">Ambezim-G (مضاد للتورم والرشح)</option>
-                    <option value="Oraxine Mouthwash (Rinse 3 times daily for 30 seconds)">Oraxine Mouthwash (مضمضة مطهرة)</option>
-                    <option value="Daktarin Oral Gel (Apply to oral cavity 4 times daily)">Daktarin Oral Gel (جل للفطريات)</option>
-                </select>
+                    <label>📝 نص الروشتة (Rx):</label>
+                    <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea>
+                    
+                    <button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>سجل الروشتات المحفوظة</h3>
+                <div id="prescriptions-list" class="item-list">جاري التحميل...</div>
+            </div>
+        </div>
 
-                <label>📝 نص الروشتة (Rx):</label>
-                <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea>
-                
-                <button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
-            </form>
+        <!-- 3. المقالات -->
+        <div id="a" class="sec">
+            <div class="card">
+                <h3>إضافة مقال جديد للعيادة</h3>
+                <form onsubmit="addArticle(event)">
+                    <input type="text" id="art-title" placeholder="عنوان المقال (مثال: نصائح بعد خلع الضرس)" required>
+                    <textarea id="art-body" rows="5" placeholder="اكتب نص المقال الطبي بالتفصيل هنا..." required></textarea>
+                    <button type="submit">نشر المقال على الموقع ✨</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>المقالات المنشورة حالياً</h3>
+                <div id="articles-list" class="item-list">جاري التحميل...</div>
+            </div>
         </div>
-        <div class="card">
-            <h3>سجل الروشتات المحفوظة</h3>
-            <div id="prescriptions-list" class="item-list">في انتظار تسجيل الدخول...</div>
-        </div>
-    </div>
 
-    <div id="a" class="sec">
-        <div class="card">
-            <h3>إضافة مقال جديد للعيادة</h3>
-            <form onsubmit="addArticle(event)">
-                <input type="text" id="art-title" placeholder="عنوان المقال (مثال: نصائح بعد خلع الضرس)" required>
-                <textarea id="art-body" rows="5" placeholder="اكتب نص المقال الطبي بالتفصيل هنا..." required></textarea>
-                <button type="submit">نشر المقال على الموقع ✨</button>
-            </form>
+        <!-- 4. الحالات -->
+        <div id="cases" class="sec">
+            <div class="card">
+                <h3>إضافة حالة جديدة (قبل وبعد العلاج)</h3>
+                <form id="case-form" onsubmit="addCase(event)">
+                    <input type="text" id="case-title" placeholder="اسم الحالة أو نوع العملية (مثال: زراعة ضرس أمامي)" required><label>📸 صورة الحالة (قبل العلاج):</label>
+                    <input type="file" id="case-before" accept="image/*" required>
+                    <label>📸 صورة الحالة (بعد العلاج):</label>
+                    <input type="file" id="case-after" accept="image/*" required>
+                    <button type="submit" id="submit-case-btn" style="background: #3f72af;">نشر الحالة في العيادة 📸</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>الحالات المعروضة حالياً</h3>
+                <div id="cases-list" class="item-list">جاري التحميل...</div>
+            </div>
         </div>
-        <div class="card">
-            <h3>المقالات المنشورة حالياً</h3>
-            <div id="articles-list" class="item-list">في انتظار تسجيل الدخول...</div>
-        </div>
-    </div>
 
-    <div id="cases" class="sec">
-        <div class="card">
-            <h3>إضافة حالة جديدة (قبل وبعد العلاج)</h3>
-            <form id="case-form" onsubmit="addCase(event)">
-                <input type="text" id="case-title" placeholder="اسم الحالة أو نوع العملية (مثال: زراعة ضرس أمامي)" required>
-                <label>📸 صورة الحالة (قبل العلاج):</label>
-                <input type="file" id="case-before" accept="image/*" required>
-                <label>📸 صورة الحالة (بعد العلاج):</label>
-                <input type="file" id="case-after" accept="image/*" required>
-                <button type="submit" id="submit-case-btn" style="background: #3f72af;">نشر الحالة في العيادة 📸</button>
-            </form>
-        </div>
-        <div class="card">
-            <h3>الحالات المعروضة حالياً</h3>
-            <div id="cases-list" class="item-list">في انتظار تسجيل الدخول...</div>
-        </div>
     </div>
 
     <script>
@@ -259,33 +294,38 @@
             };
             
             firebase.initializeApp(firebaseConfig);
-            db = firebase.database();db.ref('.info/connected').on('value', function(snapshot) {
+            db = firebase.database();
+
+            db.ref('.info/connected').on('value', function(snapshot) {
                 var statusDiv = document.getElementById('connection-status');
-                if (snapshot.val() === true) {
-                    statusDiv.style.background = "#28a745";
-                    statusDiv.innerHTML = "🟢 متصل بنجاح بسيرفر فايربيز الحقيقي واللوحة تعمل بكامل طاقتها!";
-                } else {
-                    statusDiv.style.background = "#f39c12";
-                    statusDiv.innerHTML = "🟡 جاري المحاولة.. السيرفر لم يستجب بعد (تأكد من الـ Rules أونلاين)";
+                if (statusDiv) {
+                    if (snapshot.val() === true) {
+                        statusDiv.style.background = "#28a745";
+                        statusDiv.innerHTML = "🟢 متصل بنجاح بسيرفر فايربيز واللوحة تعمل بكامل طاقتها!";
+                    } else {
+                        statusDiv.style.background = "#f39c12";
+                        statusDiv.innerHTML = "🟡 جاري المحاولة.. السيرفر لم يستجب بعد (تأكد من الـ Rules أونلاين)";
+                    }
                 }
             });
 
         } catch (error) {
             var statusDiv = document.getElementById('connection-status');
-            statusDiv.style.background = "#c0392b";
-            statusDiv.innerHTML = "🔴 خطأ في تشغيل الفايربيز: " + error.message;
+            if (statusDiv) {
+                statusDiv.style.background = "#c0392b";
+                statusDiv.innerHTML = "🔴 خطأ في تشغيل الفايربيز: " + error.message;
+            }
         }
 
-        // تشغيل مراقبة السيرفر لكل الجداول فور الدخول
         function startFirebaseLoad() {
             if(!db) return;
             
-            document.getElementById('bookings-list').innerHTML = "⏳ جاري جلب الحجوزات الحالية...";
+            document.getElementById('bookings-list').innerHTML = "⏳ جاري جلب الحجوزات...";
             document.getElementById('prescriptions-list').innerHTML = "⏳ جاري جلب الروشتات...";
             document.getElementById('articles-list').innerHTML = "⏳ جاري جلب المقالات...";
-            document.getElementById('cases-list').innerHTML = "⏳ جاري جلب الحالات المعروضة...";
+            document.getElementById('cases-list').innerHTML = "⏳ جاري جلب الحالات...";
 
-            // 1. مزامنة الحجوزات b
+            // 1. مزامنة الحجوزات
             db.ref('bookings').on('value', function(snapshot) {
                 var container = document.getElementById('bookings-list');
                 container.innerHTML = "";
@@ -301,11 +341,10 @@
                 });
             }, function(err){ showReadError('bookings-list', err); });
 
-            // 2. مزامنة الروشتات p
+            // 2. مزامنة الروشتات
             db.ref('prescriptions').on('value', function(snapshot) {
                 var container = document.getElementById('prescriptions-list');
-                container.innerHTML = "";
-                if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ."; return; }
+                container.innerHTML = "";if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ."; return; }
                 snapshot.forEach(function(child) {
                     var key = child.key; var data = child.val() || {};
                     container.innerHTML += '<div class="item-box">' +
@@ -316,11 +355,12 @@
                 });
             }, function(err){ showReadError('prescriptions-list', err); });
 
-            // 3. مزامنة المقالات a
+            // 3. مزامنة المقالات
             db.ref('articles').on('value', function(snapshot) {
                 var container = document.getElementById('articles-list');
                 container.innerHTML = "";
-                if (!snapshot.exists()) { container.innerHTML = "لا توجد مقالات منشورة."; return; }snapshot.forEach(function(child) {
+                if (!snapshot.exists()) { container.innerHTML = "لا توجد مقالات منشورة."; return; }
+                snapshot.forEach(function(child) {
                     var key = child.key; var data = child.val() || {};
                     container.innerHTML += '<div class="item-box">' +
                         '<h4>📰 العنوان: ' + safeTxt(data.title) + '</h4>' +
@@ -330,7 +370,7 @@
                 });
             }, function(err){ showReadError('articles-list', err); });
 
-            // 4. مزامنة الحالات مع عرض الصور المكبوسة
+            // 4. مزامنة الحالات
             db.ref('cases').on('value', function(snapshot) {
                 var container = document.getElementById('cases-list');
                 container.innerHTML = "";
@@ -354,11 +394,11 @@
         }
 
         function showReadError(id, err) {
-            document.getElementById(id).innerHTML = '<div class="error-msg">❌ السيرفر رفض جلب البيانات: ' + err.message + '<br>تأكد من إعدادات الـ Rules أونلاين واجعلها true.</div>';
+            document.getElementById(id).innerHTML = '<div class="error-msg">❌ السيرفر رفض جلب البيانات: ' + err.message + '</div>';
         }
 
         function deleteItem(nodeName, key) {
-            if (confirm("هل أنت متأكد من الحذف نهائياً من السيرفر؟")) {
+            if (confirm("هل أنت متأكد من الحذف نهائياً؟")) {
                 db.ref(nodeName).child(key).remove(function(error) {
                     if (error) alert("فشل الحذف: " + error.message);
                     else alert("تم الحذف بنجاح! 🎉");
@@ -373,9 +413,7 @@
                 textarea.value += select.value + "\n";
                 select.value = "";
             }
-        }
-
-        function saveAndPrintPrescription(e) {
+        }function saveAndPrintPrescription(e) {
             e.preventDefault();
             var name = document.getElementById('presc-name').value;
             var age = document.getElementById('presc-age').value;
@@ -391,7 +429,8 @@
                     document.getElementById('presc-name').value = "";
                     document.getElementById('presc-age').value = "";
                     document.getElementById('presc-body').value = "";
-                    var pWin = window.open('', '_blank');if (!pWin) { alert("تم الحفظ بنجاح، يرجى السماح بالنوافذ المنبثقة للطباعة."); return; }
+                    var pWin = window.open('', '_blank');
+                    if (!pWin) { alert("تم الحفظ بنجاح، يرجى السماح بالنوافذ المنبثقة للطباعة."); return; }
                     var htmlContent = "<html><head><title>روشتة عيادة PRO DENT</title>" +
                         "<style>body{font-family:Arial,sans-serif;direction:rtl;padding:40px;background:#fff;}" +
                         ".header{text-align:center;border-bottom:3px double #112d4e;padding-bottom:15px;margin-bottom:30px;}" +
@@ -428,8 +467,7 @@
 
         function compressAndConvert(file, callback) {
             var reader = new FileReader(); reader.readAsDataURL(file);
-            reader.onload = function (event) {
-                var img = new Image(); img.src = event.target.result;
+            reader.onload = function (event) {var img = new Image(); img.src = event.target.result;
                 img.onload = function () {
                     var canvas = document.createElement('canvas'); var max_size = 500;
                     var width = img.width; var height = img.height;
@@ -443,7 +481,8 @@
         }
 
         function addCase(e) {
-            e.preventDefault();var btn = document.getElementById('submit-case-btn');
+            e.preventDefault();
+            var btn = document.getElementById('submit-case-btn');
             var title = document.getElementById('case-title').value;
             var beforeFile = document.getElementById('case-before').files[0];
             var afterFile = document.getElementById('case-after').files[0];
