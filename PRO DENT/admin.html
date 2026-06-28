@@ -4,6 +4,17 @@
     <meta charset="utf-8">
     <title>لوحة التحكم - PRO DENT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+    </script>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -102,40 +113,18 @@
         .item-box h4 { margin: 0 0 5px 0; color: #112d4e; }
         .item-box p { margin: 5px 0; font-size: 14px; color: #555; }
         .btn-delete {
-            background: #d9534f; color: white; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; margin-top: 10px; width: auto; display: inline-block;
-        }
+            background: #d9534f; color: white; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; margin-top: 10px; width: auto; display: inline-block;}
         .badge { background: #e1e8ed; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         
         #login-screen {
             position: fixed; top:0; left:0; width:100%; height:100%;
-            background: linear-gradient(135deg, #112d4e 0%, #1a4473 100%);z-index: 999999; display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #112d4e 0%, #1a4473 100%);
+            z-index: 999999; display: flex; justify-content: center; align-items: center;
         }
         .login-card {
             background: #fff; padding: 35px 25px; border-radius: 16px; width: 90%; max-width: 360px; text-align: center;
         }
-        .err-msg { color: #d9534f; font-weight: bold; background: #fdf7f7; padding: 10px; border-radius: 6px; border: 1px solid #ecd5d5; }
     </style>
-
-    <script>
-        function checkPassword() {
-            var input = document.getElementById('pass-input').value;
-            if (input === "123456") {
-                document.getElementById('login-screen').style.display = 'none';
-                startFirebaseLoad(); 
-            } else {
-                alert("كلمة المرور خاطئة يا دكتور إبراهيم!");
-            }
-        }
-
-        function show(id, el) {
-            var secs = ['b', 'p', 'a', 'cases'];
-            for (var i = 0; i < secs.length; i++) { document.getElementById(secs[i]).style.display = 'none'; }
-            document.getElementById(id).style.display = 'block';
-            var tabs = document.querySelectorAll('.tab');
-            for (var j = 0; j < tabs.length; j++) { tabs[j].classList.remove('active'); }
-            if (el) { el.classList.add('active'); }
-        }
-    </script>
 </head>
 <body>
 
@@ -144,8 +133,8 @@
             <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
             <h2 style="color: #112d4e; margin: 0;">لوحة تحكم PRO DENT</h2>
             <p style="font-size:13px; color:#666; margin-bottom:25px;">مرحباً دكتور إبراهيم، يرجى كتابة الباسورد</p>
-            <input type="password" id="pass-input" placeholder="أدخل كلمة المرور هنا..." style="text-align: center;" onkeypress="if(event.keyCode === 13) checkPassword()">
-            <button onclick="checkPassword()">دخول لوحة التحكم 🔑</button>
+            <input type="password" id="pass-input" placeholder="أدخل كلمة المرور هنا..." style="text-align: center;">
+            <button id="login-btn">دخول لوحة التحكم 🔑</button>
         </div>
     </div>
 
@@ -184,15 +173,15 @@
                     <option value="Dalacin C 300mg cap. (1 capsule every 8 hours)">Dalacin C 300mg (لحساسية البنسلين)</option>
                     <option value="Flagyl 500mg tab. (1 tablet every 8 hours)">Flagyl 500mg (مضاد لالتهاب اللثة)</option>
                     <option value="Cataflam 50mg tab. (1 tablet every 8 hours after meals)">Cataflam 50mg (مسكن ومضاد للالتهاب)</option>
-                    <option value="Brufen 600mg tab. (1 tablet every 8 hours after meals)">Brufen 600mg (مسكن قوي)</option><option value="Ketofan 50mg cap. (1 capsule every 8 hours)">Ketofan 50mg (مسكن سريع للآلام)</option>
+                    <option value="Brufen 600mg tab. (1 tablet every 8 hours after meals)">Brufen 600mg (مسكن قوي)</option>
+                    <option value="Ketofan 50mg cap. (1 capsule every 8 hours)">Ketofan 50mg (مسكن سريع للآلام)</option>
                     <option value="Panadol Advance 500mg tab. (2 tablets when necessary)">Panadol Advance (مسكن آمن)</option>
                     <option value="Ambezim-G tab. (1 tablet 3 times daily - 1 hour before meals)">Ambezim-G (مضاد للتورم والرشح)</option>
                     <option value="Oraxine Mouthwash (Rinse 3 times daily for 30 seconds)">Oraxine Mouthwash (مضمضة مطهرة)</option>
                     <option value="Daktarin Oral Gel (Apply to oral cavity 4 times daily)">Daktarin Oral Gel (جل للفطريات)</option>
                 </select>
 
-                <label>📝 نص الروشتة (Rx):</label>
-                <textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea>
+                <label>📝 نص الروشتة (Rx):</label><textarea id="presc-body" rows="8" placeholder="تفاصيل الأدوية والجرعات..." style="direction: ltr; text-align: left; font-weight: bold;" required></textarea>
                 
                 <button type="submit" style="background: #28a745;">حفظ وطباعة الروشتة 🖨️</button>
             </form>
@@ -227,7 +216,7 @@
                 <input type="file" id="case-before" accept="image/*" required>
                 <label>📸 صورة الحالة (بعد العلاج):</label>
                 <input type="file" id="case-after" accept="image/*" required>
-                <button type="submit" id="submit-case-btn" style="background: #3f72af;">نشر الحالة في الاستوديو 📸</button>
+                <button type="submit" id="submit-case-btn" style="background: #3f72af;">نشر الحالة في العيادة 📸</button>
             </form>
         </div>
         <div class="card">
@@ -237,16 +226,45 @@
     </div>
 
     <script>
+        function checkPassword() {
+            var input = document.getElementById('pass-input').value;
+            if (input === "123456") {
+                document.getElementById('login-screen').style.display = 'none';
+                startFirebaseLoad(); 
+            } else {
+                alert("كلمة المرور خاطئة يا دكتور إبراهيم!");
+            }
+        }
+
+        function show(id, el) {
+            var secs = ['b', 'p', 'a', 'cases'];
+            for (var i = 0; i < secs.length; i++) { document.getElementById(secs[i]).style.display = 'none'; }
+            document.getElementById(id).style.display = 'block';
+            var tabs = document.querySelectorAll('.tab');
+            for (var j = 0; j < tabs.length; j++) { tabs[j].classList.remove('active'); }
+            if (el) { el.classList.add('active'); }
+        }
+
+        window.onload = function() {
+            document.getElementById('login-btn').onclick = checkPassword;
+            document.getElementById('pass-input').onkeypress = function(e) {
+                if (e.keyCode === 13) { checkPassword(); }
+            };
+        };
+
+        function safeTxt(str) {
+            if (!str) return "";
+            return str.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
         // إعدادات الفايربيز
         var firebaseConfig = {
             apiKey: "AIzaSyCMRigEePTR9zhk13Dh-CTx282vId_q2N4",
-            databaseURL: "https://pro-dent-3c752-default-rtdb.firebaseio.com",
+            databaseURL: "https://pro-dent-3c752-default-rtdb.firebaseio.com", 
             projectId: "pro-dent-3c752"
         };
         firebase.initializeApp(firebaseConfig);
-        var db = firebase.database();
-
-        // تشغيل مراقب الإشارة الحي والشريط العلوي
+        var db = firebase.database();// تشغيل مراقب الإشارة الحي والشريط العلوي
         db.ref('.info/connected').on('value', function(snapshot) {
             var statusDiv = document.getElementById('connection-status');
             if (snapshot.val() === true) {
@@ -254,29 +272,27 @@
                 statusDiv.innerHTML = "🟢 تم الاتصال بسيرفر الفايربيز بنجاح! اللوحة جاهزة للعمل.";
             } else {
                 statusDiv.style.background = "#f0ad4e";
-                statusDiv.innerHTML = "🟡 جاري محاولة الاتصال بالسيرفر... تحقق من الإنترنت";
+                statusDiv.innerHTML = "🟡 جاري محاولة الاتصال بالسيرفر... (تأكد من الـ databaseURL في الكود)";
             }
         });
 
-        // دالة الحذف العامةfunction deleteItem(nodeName, key) {
-            if (confirm("هل أنت متأكد من رغبتك في حذف هذا العنصر نهائياً؟")) {
+        function deleteItem(nodeName, key) {
+            if (confirm("هل أنت متأكد من الحذف نهائياً؟")) {
                 db.ref(nodeName).child(key).remove(function(error) {
                     if (!error) alert("تم الحذف بنجاح!");
                 });
             }
         }
 
-        // دالة إضافة الدواء تلقائياً للتكست اريا
         function addMedToText() {
             var select = document.getElementById('med-select');
             var textarea = document.getElementById('presc-body');
             if (select && textarea && select.value !== "") {
                 textarea.value += select.value + "\n";
-                select.value = ""; // إعادة تصفير القائمة بعد الاختيار
+                select.value = "";
             }
         }
 
-        // جلب الداتا وعرضها بالكامل
         function startFirebaseLoad() {
             document.getElementById('bookings-list').innerHTML = "جاري تحميل الحجوزات...";
             document.getElementById('prescriptions-list').innerHTML = "جاري تحميل سجل الروشتات...";
@@ -298,8 +314,6 @@
                         '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
                         '</div>';
                 });
-            }, function(err) {
-                document.getElementById('bookings-list').innerHTML = '<div class="err-msg">❌ خطأ في السيرفر: ' + err.message + '</div>';
             });
 
             // 2. جلب الروشتات p
@@ -311,17 +325,14 @@
                     var key = childSnapshot.key;
                     var data = childSnapshot.val() || {};
                     container.innerHTML += '<div class="item-box" style="padding:15px;">' +
-                        '<h4>👤 المريض: ' + safeTxt(data.name ⠵⠞⠞⠞⠺⠺⠵⠞⠺⠞⠞⠺⠺⠺⠟⠞⠞⠞⠟⠞⠺⠞⠺⠞⠺⠺⠟⠞⠺⠺⠺⠟⠟⠟⠞⠟⠞⠺⠺⠟⠟⠵⠟⠟⠟ "0") + ')</h4>' +
+                        '<h4>👤 المريض: ' + safeTxt(data.name ⠞⠞⠞⠵⠺⠟⠟⠟⠵⠺⠟⠵⠺⠞⠺⠟⠞⠞⠵⠞⠺⠟⠵⠺⠺⠵⠞⠵⠟⠺⠟⠺⠞⠺⠺⠟⠺⠟⠵⠟⠺⠟⠞⠟⠵ "0") + ')</h4>' +
                         '<pre style="direction:ltr; text-align:left; background:#fff; padding:10px; font-weight:bold; white-space:pre-wrap;">' + safeTxt(data.body) + '</pre>' +
                         '<button class="btn-delete" onclick="deleteItem(\'prescriptions\', \'' + key + '\')">حذف الروشتة 🗑️</button>' +
                         '</div>';
                 });
-            }, function(err) {
-                document.getElementById('prescriptions-list').innerHTML = '<div class="err-msg">❌ خطأ في السيرفر: ' + err.message + '</div>';
-            });
-
-            // 3. جلب المقالات a
-            db.ref('articles').on('value', function(snapshot) {var container = document.getElementById('articles-list');
+            });// 3. جلب المقالات a
+            db.ref('articles').on('value', function(snapshot) {
+                var container = document.getElementById('articles-list');
                 container.innerHTML = "";
                 if (!snapshot.exists()) { container.innerHTML = "لا توجد مقالات منشورة حالياً."; return; }
                 snapshot.forEach(function(childSnapshot) {
@@ -333,8 +344,6 @@
                         '<button class="btn-delete" onclick="deleteItem(\'articles\', \'' + key + '\')">حذف المقال 🗑️</button>' +
                         '</div>';
                 });
-            }, function(err) {
-                document.getElementById('articles-list').innerHTML = '<div class="err-msg">❌ خطأ في السيرفر: ' + err.message + '</div>';
             });
 
             // 4. جلب الحالات cases
@@ -350,12 +359,9 @@
                         '<button class="btn-delete" onclick="deleteItem(\'cases\', \'' + key + '\')">حذف الحالة نهائياً 🗑️</button>' +
                         '</div>';
                 });
-            }, function(err) {
-                document.getElementById('cases-list').innerHTML = '<div class="err-msg">❌ خطأ في السيرفر: ' + err.message + '</div>';
             });
         }
 
-        // حفظ وطباعة الروشتة المكتوبة
         function saveAndPrintPrescription(e) {
             e.preventDefault();
             var name = document.getElementById('presc-name').value;
@@ -370,7 +376,6 @@
                     document.getElementById('presc-name').value = "";
                     document.getElementById('presc-age').value = "";
                     document.getElementById('presc-body').value = "";
-                    
                     var pWin = window.open('', '_blank');
                     if (!pWin) { alert("تم الحفظ بنجاح، يرجى السماح بالنوافذ المنبثقة للطباعة."); return; }
                     var htmlContent = "<html><head><title>روشتة عيادة PRO DENT</title>" +
@@ -379,9 +384,9 @@
                         ".header h2{margin:0 0 5px 0;color:#112d4e;font-size:26px;}" +
                         ".header h3{margin:5px 0;color:#3f72af;font-size:20px;}" +
                         ".header p{margin:5px 0;font-size:14px;color:#555;font-weight:bold;}" +
-                        ".info-table{width:100%;font-size:16px;margin-bottom:40px;border-bottom:1px solid #ccc;padding-bottom:10px;}" +".rx-title{font-size:28px;font-weight:bold;color:#112d4e;text-align:left;margin-bottom:15px;font-style:italic;}" +
-                        ".rx-body{direction:ltr;text-align:left;font-size:19px;line-height:1.8;min-height:280px;white-space:pre-wrap;font-weight:bold;padding-left:15px;}" +
-                        ".footer{text-align:center;margin-top:40px;border-top:2px solid #112d4e;padding-top:10px;font-size:13px;color:#777;font-weight:bold;}" +
+                        ".info-table{width:100%;font-size:16px;margin-bottom:40px;border-bottom:1px solid #ccc;padding-bottom:10px;}" +
+                        ".rx-title{font-size:28px;font-weight:bold;color:#112d4e;text-align:left;margin-bottom:15px;font-style:italic;}" +
+                        ".rx-body{direction:ltr;text-align:left;font-size:19px;line-height:1.8;min-height:280px;white-space:pre-wrap;font-weight:bold;padding-left:15px;}" +".footer{text-align:center;margin-top:40px;border-top:2px solid #112d4e;padding-top:10px;font-size:13px;color:#777;font-weight:bold;}" +
                         "</style></head><body>" +
                         "<div class='header'><h2>عيادة PRO DENT لطب وجراحة الأسنان</h2><h3>الدكتور: إبراهيم عبدالمحسن فوزي</h3><p>العنوان: المحلة الكبرى | تليفون: 01020526886</p></div>" +
                         "<table class='info-table'><tr><td><b>اسم المريض:</b> " + safeTxt(name) + "</td><td><b>السن:</b> " + safeTxt(age) + " سنة</td><td style='text-align:left;'><b>التاريخ:</b> " + safeTxt(dateStr) + "</td></tr></table>" +
@@ -393,21 +398,18 @@
             });
         }
 
-        // إضافة ونشر مقال جديد
         function addArticle(e) {
             e.preventDefault();
             var title = document.getElementById('art-title').value;
             var body = document.getElementById('art-body').value;
             db.ref('articles').push({ title: title, body: body }, function(err) {
                 if (!err) {
-                    alert("تم نشر المقال الطبي بنجاح على موقع العيادة! ✨");
-                    document.getElementById('art-title').value = "";
-                    document.getElementById('art-body').value = "";
+                    alert("تم نشر المقال بنجاح! ✨");
+                    document.getElementById('art-title').value = ""; document.getElementById('art-body').value = "";
                 }
             });
         }
 
-        // دالة ضغط وتحويل الصور لـ Base64 لرفعها وحفظها مجاناً في السيرفر بدون استهلاك مساحة
         function compressAndConvert(file, callback) {
             var reader = new FileReader(); reader.readAsDataURL(file);
             reader.onload = function (event) {
@@ -424,46 +426,18 @@
             };
         }
 
-        // نشر حالة جديدة بالصور (قبل وبعد)
         function addCase(e) {
             e.preventDefault();
             var btn = document.getElementById('submit-case-btn');
             var title = document.getElementById('case-title').value;
             var beforeFile = document.getElementById('case-before').files[0];
             var afterFile = document.getElementById('case-after').files[0];
-
-            btn.disabled = true;
-            btn.innerText = "جاري ضغط ومعالجة الصور... انتظر ثواني ⏳";
-
+            btn.disabled = true; btn.innerText = "جاري ضغط ومعالجة الصور...⏳";
             compressAndConvert(beforeFile, function(beforeBase64) {
                 compressAndConvert(afterFile, function(afterBase64) {
-                    db.ref('cases').push({
-                        title: title, before: beforeBase64, after: afterBase64
-                    }, function(err) {".rx-title{font-size:28px;font-weight:bold;color:#112d4e;text-align:left;margin-bottom:15px;font-style:italic;}" +
-                        ".rx-body{direction:ltr;text-align:left;font-size:19px;line-height:1.8;min-height:280px;white-space:pre-wrap;font-weight:bold;padding-left:15px;}" +
-                        ".footer{text-align:center;margin-top:40px;border-top:2px solid #112d4e;padding-top:10px;font-size:13px;color:#777;font-weight:bold;}" +
-                        "</style></head><body>" +
-                        "<div class='header'><h2>عيادة PRO DENT لطب وجراحة الأسنان</h2><h3>الدكتور: إبراهيم عبدالمحسن فوزي</h3><p>العنوان: المحلة الكبرى | تليفون: 01020526886</p></div>" +
-                        "<table class='info-table'><tr><td><b>اسم المريض:</b> " + safeTxt(name) + "</td><td><b>السن:</b> " + safeTxt(age) + " سنة</td><td style='text-align:left;'><b>التاريخ:</b> " + safeTxt(dateStr) + "</td></tr></table>" +
-                        "<div class='rx-title'>Rx:</div><div class='rx-body'>" + safeTxt(body) + "</div>" +
-                        "<div class='footer'><p>تمنياتنا بالشفاء العاجل | يرجى الالتزام التام بالجرعات المحددة من قبل الطبيب.</p></div>" +
-                        "</body></html>";
-                    pWin.document.write(htmlContent); pWin.document.close(); pWin.print();
-                }
-            });
-        }
-
-        // إضافة ونشر مقال جديد
-        function addArticle(e) {
-            e.preventDefault();
-            var title = document.getElementById('art-title').value;
-            var body = document.getElementById('art-body').value;
-            db.ref('articles').push({ title: title, body: body }, function(err) {btn.disabled = false;
-                        btn.innerText = "نشر الحالة في العيادة 📸";
-                        if (!err) {
-                            alert("تم رفع صور الحالة بنجاح ونشرها في الاستوديو! 🎉");
-                            document.getElementById('case-form').reset();
-                        }
+                    db.ref('cases').push({ title: title, before: beforeBase64, after: afterBase64 }, function(err) {
+                        btn.disabled = false; btn.innerText = "نشر الحالة في العيادة 📸";
+                        if (!err) { alert("تم نشر الحالة بالصور بنجاح! 🎉"); document.getElementById('case-form').reset(); }
                     });
                 });
             });
@@ -471,4 +445,3 @@
     </script>
 </body>
 </html>
-            
