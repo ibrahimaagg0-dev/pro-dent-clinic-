@@ -122,7 +122,8 @@
             color: white;
             border: none;
             border-radius: 8px;
-            font-weight: bold;cursor: pointer;
+            font-weight: bold;
+            cursor: pointer;
             font-size: 15px;
         }
         .item-list { margin-top: 15px; }
@@ -135,9 +136,15 @@
         }
         .item-box h4 { margin: 0 0 5px 0; color: #112d4e; }
         .item-box p { margin: 5px 0; font-size: 14px; color: #555; }
+        
         .btn-delete {
             background: #d9534f; color: white; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; margin-top: 10px; width: auto; display: inline-block;
         }
+        /* زرار الواتساب الاحترافي */
+        .btn-whatsapp {
+            background: #25d366; color: white; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; margin-top: 10px; width: auto; display: inline-block; margin-left: 8px; font-weight: bold;
+        }
+        
         .badge { background: #e1e8ed; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         .error-msg { color: #d9534f; background: #fdf2f2; padding: 10px; border-radius: 8px; border: 1px solid #f5baba; font-size: 14px; }
         
@@ -149,6 +156,7 @@
 
     <script>
         var db = null;
+        var lastBookingCount = -1; // لمراقبة أعداد الحجوزات الجديدة
 
         function safeTxt(str) {
             if (!str) return "";
@@ -158,7 +166,6 @@
         function checkPassword() {
             var input = document.getElementById('pass-input').value;
             if (input === "123456") {
-                // إخفاء صفحة الباسورد تماماً وإظهار اللوحة الرئيسية
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 startFirebaseLoad(); 
@@ -175,6 +182,59 @@
             for (var j = 0; j < tabs.length; j++) { tabs[j].classList.remove('active'); }
             if (el) { el.classList.add('active'); }
         }
+
+        // دالة توليد صوت التنبيه برمجياً بدون الحاجة لملفات خارجية
+        function playNotificationSound() {
+            try {
+                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // النغمة الأولى
+                var osc1 = audioCtx.createOscillator();
+                var gain1 = audioCtx.createGain();
+                osc1.connect(gain1); gain1.connect(audioCtx.destination);
+                osc1.type = 'sine'; osc1.frequency.value = 523.25; // نغمة C5
+                gain1.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                osc1.start(); osc1.stop(audioCtx.currentTime + 0.15);
+                
+                // النغمة الثانية المبهجة بعدها مباشرة
+                setTimeout(function() {
+                    var osc2 = audioCtx.createOscillator();
+                    var gain2 = audioCtx.createGain();
+                    osc2.connect(gain2); gain2.connect(audioCtx.destination);
+                    osc2.type = 'sine'; osc2.frequency.value = 659.25; // نغمة E5
+                    gain2.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    osc2.start(); osc2.stop(audioCtx.currentTime + 0.25);
+                }, 150);
+            } catch (e) {
+                console.log("Audio contexts pending or blocked by browser policy.");
+            }
+        }
+
+        // دالة إرسال رسالة الواتساب وتجهيز الرقم المصري تلقائياً
+        function sendWhatsAppConfirmation(phone, name) {
+            if (!phone) {
+                alert("المريض لم يسجل رقم هاتف!");
+                return;
+            }
+            
+            // تنظيف رقم الهاتف وصياغته بكود مصر الدولي (20)
+            var cleanPhone = phone.toString().trim();
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '2' + cleanPhone; // يحول 010... إلى 2010...
+            } else if (!cleanPhone.startsWith('2')) {
+                cleanPhone = '20' + cleanPhone; // يضمن وجود كود الدولة
+            }
+            
+            // صياغة رسالة عيادة PRO DENT الاحترافية
+            var msg = "السلام عليكم ورحمة الله وبركاته يا فندم، مَع حضرتك عيادة PRO DENT لطب وجراحة الأسنان ✨\n\n";
+            msg += "بنبلغ أ/ " + name + " إنه تم استلام وتسجيل بيانات حجزكم بنجاح في منظومة العيادة أونلاين. \n\n";
+            msg += "دكتور إبراهيم هيتواصل مع حضرتك قريباً جداً لتنسيق وتأكيد ساعة الحجز بالتفصيل.\n\n";
+            msg += "شرفتنا ونتمنى لك دوام الصحة والعافية 🦷";
+            
+            // فتح رابط واتساب ويب أو التطبيق المباشر
+            var waUrl = "https://api.whatsapp.com/send?phone=" + cleanPhone + "&text=" + encodeURIComponent(msg);
+            window.open(waUrl, '_blank');
+        }
     </script>
 </head>
 <body>
@@ -190,7 +250,7 @@
         </div>
     </div>
 
-    <!-- كبسولة اللوحة الرئيسية (لن تظهر نهائياً إلا بعد تخطي الأمان) -->
+    <!-- كبسولة اللوحة الرئيسية -->
     <div id="main-app">
         
         <div id="connection-status">🟡 جاري فحص كود الجافا سكريبت والاتصال...</div>
@@ -212,7 +272,9 @@
                 <h3>قائمة الحجوزات الحالية</h3>
                 <div id="bookings-list" class="item-list">جاري التحميل...</div>
             </div>
-        </div><!-- 2. الروشتات -->
+        </div>
+
+        <!-- 2. الروشتات -->
         <div id="p" class="sec">
             <div class="card">
                 <h3>كتابة روشتة جديدة 🖨️</h3>
@@ -253,7 +315,7 @@
             <div class="card">
                 <h3>إضافة مقال جديد للعيادة</h3>
                 <form onsubmit="addArticle(event)">
-                    <input type="text" id="art-title" placeholder="عنوان المقال (مثال: نصائح بعد خلع الضرس)" required>
+                    <input type="text" id="art-title" placeholder="عنوان المقال" required>
                     <textarea id="art-body" rows="5" placeholder="اكتب نص المقال الطبي بالتفصيل هنا..." required></textarea>
                     <button type="submit">نشر المقال على الموقع ✨</button>
                 </form>
@@ -269,7 +331,8 @@
             <div class="card">
                 <h3>إضافة حالة جديدة (قبل وبعد العلاج)</h3>
                 <form id="case-form" onsubmit="addCase(event)">
-                    <input type="text" id="case-title" placeholder="اسم الحالة أو نوع العملية (مثال: زراعة ضرس أمامي)" required><label>📸 صورة الحالة (قبل العلاج):</label>
+                    <input type="text" id="case-title" placeholder="اسم الحالة أو نوع العملية" required>
+                    <label>📸 صورة الحالة (قبل العلاج):</label>
                     <input type="file" id="case-before" accept="image/*" required>
                     <label>📸 صورة الحالة (بعد العلاج):</label>
                     <input type="file" id="case-after" accept="image/*" required>
@@ -325,17 +388,32 @@
             document.getElementById('articles-list').innerHTML = "⏳ جاري جلب المقالات...";
             document.getElementById('cases-list').innerHTML = "⏳ جاري جلب الحالات...";
 
-            // 1. مزامنة الحجوزات
+            // 1. مزامنة ورصد الحجوزات + ميزة التنبيه الصوتي الحية
             db.ref('bookings').on('value', function(snapshot) {
                 var container = document.getElementById('bookings-list');
                 container.innerHTML = "";
+                
+                var currentCount = snapshot.numChildren();
+                
+                // إذا زاد عدد الأطفال عن العدد السابق، فهناك حجز جديد سُجل حالاً!
+                if (lastBookingCount !== -1 && currentCount > lastBookingCount) {
+                    playNotificationSound();
+                }
+                lastBookingCount = currentCount; // تحديث العداد
+                
                 if (!snapshot.exists()) { container.innerHTML = "لا توجد حجوزات حية حالياً."; return; }
+                
                 snapshot.forEach(function(child) {
                     var key = child.key; var data = child.val() || {};
+                    var nameEscaped = safeTxt(data.name || "بدون اسم");
+                    var phoneEscaped = safeTxt(data.phone || "");
+                    
                     container.innerHTML += '<div class="item-box">' +
-                        '<h4>👤 المريض: ' + safeTxt(data.name || "بدون اسم") + '</h4>' +
-                        '<p>📞 الموبايل: <a href="tel:' + safeTxt(data.phone) + '">' + safeTxt(data.phone || "لا يوجد") + '</a></p>' +
+                        '<h4>👤 المريض: ' + nameEscaped + '</h4>' +
+                        '<p>📞 الموبايل: <a href="tel:' + phoneEscaped + '">' + (phoneEscaped || "لا يوجد") + '</a></p>' +
                         '<p>🦷 الخدمة: <span class="badge">' + safeTxt(data.service || "كشف") + '</span></p>' +
+                        // زرار الواتساب وزرار المسح
+                        '<button class="btn-whatsapp" onclick="sendWhatsAppConfirmation(\'' + phoneEscaped + '\', \'' + nameEscaped + '\')">إرسال تأكيد واتساب 💬</button>' +
                         '<button class="btn-delete" onclick="deleteItem(\'bookings\', \'' + key + '\')">مسح الحجز 🗑️</button>' +
                         '</div>';
                 });
@@ -344,7 +422,8 @@
             // 2. مزامنة الروشتات
             db.ref('prescriptions').on('value', function(snapshot) {
                 var container = document.getElementById('prescriptions-list');
-                container.innerHTML = "";if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ."; return; }
+                container.innerHTML = "";
+                if (!snapshot.exists()) { container.innerHTML = "سجل الروشتات فارغ."; return; }
                 snapshot.forEach(function(child) {
                     var key = child.key; var data = child.val() || {};
                     container.innerHTML += '<div class="item-box">' +
@@ -413,7 +492,9 @@
                 textarea.value += select.value + "\n";
                 select.value = "";
             }
-        }function saveAndPrintPrescription(e) {
+        }
+
+        function saveAndPrintPrescription(e) {
             e.preventDefault();
             var name = document.getElementById('presc-name').value;
             var age = document.getElementById('presc-age').value;
@@ -467,7 +548,8 @@
 
         function compressAndConvert(file, callback) {
             var reader = new FileReader(); reader.readAsDataURL(file);
-            reader.onload = function (event) {var img = new Image(); img.src = event.target.result;
+            reader.onload = function (event) {
+                var img = new Image(); img.src = event.target.result;
                 img.onload = function () {
                     var canvas = document.createElement('canvas'); var max_size = 500;
                     var width = img.width; var height = img.height;
